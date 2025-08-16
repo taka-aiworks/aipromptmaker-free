@@ -1257,7 +1257,8 @@ function pairWearColors(parts){
 }
 
 function getSelectedNSFW_Learn(){
-  if (!$("#nsfwLearn").checked) return [];
+    const box = document.getElementById("nsfwLearn");
+    if (!box || !box.checked) return [];
   const pickeds = [
     ...$$('input[name="nsfwL_expr"]:checked').map(x=>x.value),
     ...$$('input[name="nsfwL_expo"]:checked').map(x=>x.value),
@@ -1496,7 +1497,7 @@ function buildBatchProduction(n){
   const lights = getMany("p_light");
   const acc    = readAccessorySlots();
 
-  const nsfwOn = $("#nsfwProd").checked;
+  const nsfwOn = !!document.getElementById("nsfwProd")?.checked;
   const nsfwAdd = nsfwOn ? uniq([
     ...getMany("nsfwP_expr"),
     ...getMany("nsfwP_expo"),
