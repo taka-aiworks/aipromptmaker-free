@@ -36,6 +36,17 @@ function seedFromName(nm, extra = 0) {
   return h >>> 0;
 }
 
+const gasUrl = document.getElementById('set_gasUrl');
+if (gasUrl) {
+  gasUrl.value = localStorage.getItem('gasUrl') || '';
+  // …必要なイベントもここで
+}
+
+const importDict = document.getElementById('importDict');
+if (importDict) {
+  importDict.addEventListener('change', onImportDict);
+}
+
 /* ========= 設定（LocalStorage） ========= */
 const LS_KEY = "LPM_SETTINGS_V1";
 const Settings = { gasUrl: "", gasToken: "" };
