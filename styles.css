@@ -716,3 +716,31 @@ legend { display: none; }
 /* 文言が折り返されて位置がブレないように */
 #linkPro { white-space: nowrap; }
 
+/* ヘッダーを2カラム化 */
+.header .inner{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  align-items:center;
+  column-gap:12px;
+}
+
+/* 左側の要素（タブバーと状態）は左カラムへ */
+.header .inner > .tabbar { grid-column: 1; }
+.header .inner > .row.mini:first-of-type { grid-column: 1; } /* 状態: 内蔵辞書 ... */
+
+/* 右側の要素（プロ版ボタンの行）は右カラムへ */
+.header .inner > .row.mini:last-of-type{
+  grid-column: 2;
+  justify-self: end;           /* 右端に寄せる */
+}
+
+/* 余計な行マージンがあれば詰める（任意） */
+.header .inner > .row.mini{ margin: 0; }
+
+/* スマホで崩れる場合の保険（任意） */
+@media (max-width: 640px){
+  .header .inner{
+    grid-template-columns: 1fr auto;
+  }
+  .header .tabbar{ overflow:auto; }
+}
