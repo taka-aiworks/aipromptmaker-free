@@ -23,7 +23,7 @@ function dl(filename, text) {
   setTimeout(() => URL.revokeObjectURL(url), 500);
 }
 const uniq = (a) => [...new Set(a.filter(Boolean))];
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const pick = (arr) => (arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : "");
 function nowStamp() {
   const d = new Date(), z = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}`;
@@ -1783,7 +1783,7 @@ function initAll(){
   bindDictIO();
   bindCharIO();
   bindNSFWToggles();
-  bindLearnTest();
+  bindLearnTest(); 
   bindLearnBatch();
   bindProduction();
   bindGASTools();
@@ -1800,7 +1800,8 @@ function initAll(){
     bindBottomCategoryGuess();
     fillAccessorySlots();
     renderNSFWLearning();
-    renderNSFWProduction();initHairEyeAndAccWheels(); // ← 髪/瞳/アクセのピッカーとトグル連動をまとめて初期化
+    renderNSFWProduction();
+    initHairEyeAndAccWheels();
 
     // 色系
     // 基本情報タブの「服カラー（固定）」3つを初期化
@@ -1824,8 +1825,11 @@ function initAll(){
 document.addEventListener('DOMContentLoaded', initAll);
 
 function bindOneTestUI(){
-  // クリック
-  $("#btnOneLearn")?.addEventListener("click", runOneTest);
+  // クリック  
+   $("#btnOneLearn")?.addEventListener("click", () => {
+     try { runOneTest(); }
+     catch (e) { console.error(e); toast("生成中にエラー: " + (e?.message || e)); }
+   });
   $("#btnCopyLearnTest")?.addEventListener("click", copyOneTestText);
 
   // フォーマット変更時に再整形
