@@ -706,3 +706,13 @@ legend { display: none; }
 
 /* タブが被らないよう右側に余白を空ける */
 .tabbar { padding-right: 160px; }  /* この行は「.pro-btn が absolute のときだけ」残す */
+
+/* ヘッダー内の行をフレックス化 */
+.header .inner .row { display: flex; align-items: center; }
+
+/* 最後の行（リンクの行）を右寄せ */
+.header .inner .row.mini:last-child { justify-content: flex-end; }
+
+/* 文言が折り返されて位置がブレないように */
+#linkPro { white-space: nowrap; }
+
