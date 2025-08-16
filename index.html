@@ -349,17 +349,5 @@
       });
     });
   </script>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const a = document.getElementById('linkPro');
-  if (!a) return;
-  a.addEventListener('click', (e) => {
-    e.preventDefault(); // 一旦止める
-    try { alert("有料版の販売ページを開きます"); } catch(_) {}
-    // アラートがブロックされても必ず開く
-    window.open(a.href, '_blank', 'noopener');
-  });
-});
-</script>
 </body>
 </html>
