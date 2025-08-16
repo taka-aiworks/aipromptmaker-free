@@ -52,7 +52,7 @@ a { color: var(--brand); text-decoration: none; }
   .span-2 { grid-column: span 2; }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .g3, .g2 { grid-template-columns: 1fr; }
   .g4 { grid-template-columns: repeat(2, 1fr); }
 }
