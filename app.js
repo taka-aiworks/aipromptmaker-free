@@ -42,11 +42,6 @@ if (gasUrl) {
   // …必要なイベントもここで
 }
 
-const importDict = document.getElementById('importDict');
-if (importDict) {
-  importDict.addEventListener('change', onImportDict);
-}
-
 /* ========= 設定（LocalStorage） ========= */
 const LS_KEY = "LPM_SETTINGS_V1";
 const Settings = { gasUrl: "", gasToken: "" };
@@ -538,7 +533,7 @@ function getLearningWearColorParts(sel){
   if (sel.mode === "onepiece") {
     if (sel.dress && top) {
       // ワンピース全体を上色で着色
-      const noun = (/\bkimono|yukata\b/i.test(sel.dress)) ? "kimono"
+      const noun = (/\b(?:kimono|yukata)\b/i.test(sel.dress)) ? "kimono"
                 : (/\bgown\b/i.test(sel.dress))           ? "gown"
                 : "dress";
       parts.push(`${top} ${noun}`);
