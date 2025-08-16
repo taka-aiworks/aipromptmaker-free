@@ -812,6 +812,8 @@ function renderSFW(){
   radioList($("#bf_relation"), SFW.relationship, "bf_relation");
   radioList($("#bf_world"),    SFW.worldview,    "bf_world");
   radioList($("#bf_tone"),     SFW.speech_tone,  "bf_tone");
+
+   if (typeof updateOneTestReady === "function") updateOneTestReady();
 }
 
 function bindBottomCategoryGuess(){
@@ -1788,6 +1790,10 @@ function initAll(){
 
   bindBottomCategoryRadios();
 
+   // まず一回バインドしておく（辞書ロード前でもOKなものだけ拾える）
+  bindOneTestUI();
+  updateOneTestReady();
+
    
   loadDefaultDicts().then(()=>{
     renderSFW();
@@ -1809,6 +1815,9 @@ function initAll(){
 
     initSkinTone();
     initNSFWStatusBadge();
+         // もう一度確実に（重複登録しても安全なコードなのでOK）
+    bindOneTestUI();
+    updateOneTestReady();
   });
 }
 
