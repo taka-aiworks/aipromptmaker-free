@@ -300,39 +300,18 @@
     </section>
 
     <!-- =======================
-         設定（FREE：辞書I/Oを隠す）
-         ======================= -->
-    <section id="panelSettings" class="card" hidden>
-      <h2>⚙️ 設定</h2>
-      <div class="grid g3">
-        <div class="panel">
-          <h3>クラウド保存（GAS）</h3>
-          <label>クラウド保存URL（GAS）</label>
-          <input id="set_gasUrl" type="text" placeholder="https://script.google.com/macros/s/XXXX/exec">
-          <label style="margin-top:8px">GAS トークン（任意 / Bearer）</label>
-          <input id="set_gasToken" type="password" placeholder="****">
-          <div class="row" style="margin-top:8px">
-            <button id="btnTestGAS" class="btn ghost small">接続テスト</button>
-            <span id="gasTestResult" class="mini"></span>
-          </div>
-        </div>
-
-        <!-- FREE EDIT: 辞書I/Oは非表示 -->
-        <div class="panel" style="display:none">
-          <h3>辞書 I/O（SFW / NSFW）</h3>
-          <input type="file" id="importDict" accept="application/json" hidden>
-          <label for="importDict" class="btn small">辞書インポート</label>
-          <button id="btnExport" class="btn ghost small">辞書エクスポート</button>
-        </div>
-
-        <div class="panel">
-          <h3>アプリ管理</h3>
-          <div class="note mini">表示が崩れたらキャッシュ初期化でOK。</div>
-          <button id="btnSaveSettings" class="btn ok small">設定を保存</button>
-          <button id="btnResetSettings" class="btn bad small" style="margin-left:6px">キャッシュ初期化</button>
-        </div>
-      </div>
-    </section>
+     設定（FREE：ロック）
+     ======================= -->
+<section id="panelSettings" class="card" hidden>
+  <h2>⚙️ 設定</h2>
+  <div class="panel is-disabled" style="text-align:center; padding:28px">
+    <h3 style="margin:0 0 6px">🚫 無料版ではご利用いただけません</h3>
+    <p class="mini" style="margin:6px 0 12px">
+      クラウド保存・辞書I/O・アプリ管理などの高度機能は<b>有料版</b>で解放されます。
+    </p>
+    <a class="btn ok" href="#" onclick="alert('有料版の販売ページは準備中です');return false;">有料版のご案内</a>
+  </div>
+</section>
   </main>
 
   <script src="app.js" defer></script>
