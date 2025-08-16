@@ -1831,8 +1831,9 @@ function bindOneTestUI(){
   });
 
   // 入力監視：基本情報一式が更新されたら判定を更新
-  const watchSelectors = [
+  const watchSelectors = [ 
     "#charName", "#tagH", "#tagE", "#tagSkin",
+    "#satH", "#litH", "#satE", "#litE", "#skinTone",
     'input[name="hairStyle"]','input[name="eyeShape"]','input[name="face"]','input[name="skinBody"]','input[name="artStyle"]',
     'input[name="outfitMode"]','input[name="outfit_top"]','input[name="outfit_pants"]','input[name="outfit_skirt"]','input[name="outfit_dress"]',
     'input[name="bg"]','input[name="pose"]','input[name="expr"]',
