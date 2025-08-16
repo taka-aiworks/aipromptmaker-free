@@ -1857,27 +1857,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // ...既存の init / bind 系...
   bindOneTestUI();
 });
-
-
-.pro-link {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-}
-
-.btn.pro {
-  background: linear-gradient(90deg, #f6d365, #fda085);
-  color: #fff;
-  font-weight: bold;
-  padding: 6px 14px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.btn.pro:hover {
-  opacity: 0.9;
-  transform: scale(1.05);
-}
