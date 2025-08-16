@@ -692,22 +692,17 @@ legend { display: none; }
 }
 
 
-/* 右上固定の水平ボタンに固定 */
-.header .inner { position: relative; }
+/* ヘッダー内を基準にする */
+.header .inner { position: relative; justify-content: flex-start; }
 
+/* 右上に固定（重ならないように） */
 .pro-btn{
-  position: absolute !important;
-  top: 8px !important;
-  right: 12px !important;
-  writing-mode: horizontal-tb !important;
-  transform: none !important;
-  rotate: 0deg !important;
-  display: inline-flex !important;
-  align-items: center;
+  position: absolute;
+  top: 8px;
+  right: 12px;
   white-space: nowrap;
   z-index: 5;
 }
 
-/* タブに被らない余白（幅に応じて調整） */
-.tabbar { padding-right: 160px; }
-
+/* タブが被らないよう右側に余白を空ける */
+.tabbar { padding-right: 160px; }  /* この行は「.pro-btn が absolute のときだけ」残す */
