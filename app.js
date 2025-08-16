@@ -36,12 +36,6 @@ function seedFromName(nm, extra = 0) {
   return h >>> 0;
 }
 
-const gasUrl = document.getElementById('set_gasUrl');
-if (gasUrl) {
-  gasUrl.value = localStorage.getItem('gasUrl') || '';
-  // …必要なイベントもここで
-}
-
 /* ========= 設定（LocalStorage） ========= */
 const LS_KEY = "LPM_SETTINGS_V1";
 const Settings = { gasUrl: "", gasToken: "" };
@@ -533,7 +527,7 @@ function getLearningWearColorParts(sel){
   if (sel.mode === "onepiece") {
     if (sel.dress && top) {
       // ワンピース全体を上色で着色
-      const noun = (/\b(?:kimono|yukata)\b/i.test(sel.dress)) ? "kimono"
+      const noun = (/\bkimono|yukata\b/i.test(sel.dress)) ? "kimono"
                 : (/\bgown\b/i.test(sel.dress))           ? "gown"
                 : "dress";
       parts.push(`${top} ${noun}`);
@@ -1831,9 +1825,8 @@ function bindOneTestUI(){
   });
 
   // 入力監視：基本情報一式が更新されたら判定を更新
-  const watchSelectors = [ 
+  const watchSelectors = [
     "#charName", "#tagH", "#tagE", "#tagSkin",
-    "#satH", "#litH", "#satE", "#litE", "#skinTone",
     'input[name="hairStyle"]','input[name="eyeShape"]','input[name="face"]','input[name="skinBody"]','input[name="artStyle"]',
     'input[name="outfitMode"]','input[name="outfit_top"]','input[name="outfit_pants"]','input[name="outfit_skirt"]','input[name="outfit_dress"]',
     'input[name="bg"]','input[name="pose"]','input[name="expr"]',
