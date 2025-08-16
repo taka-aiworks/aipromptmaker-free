@@ -692,22 +692,22 @@ legend { display: none; }
 }
 
 
-/* styles.css に追加 */
+/* 右上固定の水平ボタンに固定 */
 .header .inner { position: relative; }
 
 .pro-btn{
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: linear-gradient(90deg,#ff9800,#ff5722);
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
-  z-index: 5; /* タブより前面 */
+  position: absolute !important;
+  top: 8px !important;
+  right: 12px !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  rotate: 0deg !important;
+  display: inline-flex !important;
+  align-items: center;
+  white-space: nowrap;
+  z-index: 5;
 }
-.pro-btn:hover{ opacity:.9; }
 
-/* ボタン分だけタブバーの右に余白を確保（値はボタン幅に合わせて調整） */
+/* タブに被らない余白（幅に応じて調整） */
 .tabbar { padding-right: 160px; }
+
