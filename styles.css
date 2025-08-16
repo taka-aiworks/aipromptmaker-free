@@ -692,55 +692,23 @@ legend { display: none; }
 }
 
 
-/* ヘッダー内を基準にする */
-.header .inner { position: relative; justify-content: flex-start; }
-
-/* 右上に固定（重ならないように） */
-.pro-btn{
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  white-space: nowrap;
-  z-index: 5;
-}
-
-/* タブが被らないよう右側に余白を空ける */
-.tabbar { padding-right: 160px; }  /* この行は「.pro-btn が absolute のときだけ」残す */
-
-/* ヘッダー内の行をフレックス化 */
-.header .inner .row { display: flex; align-items: center; }
-
-/* 最後の行（リンクの行）を右寄せ */
-.header .inner .row.mini:last-child { justify-content: flex-end; }
-
-/* 文言が折り返されて位置がブレないように */
-#linkPro { white-space: nowrap; }
-
-/* ヘッダーを2カラム化 */
+/* ヘッダーをグリッド1fr|autoで一本化 */
 .header .inner{
-  display:grid;
+  display: grid;
   grid-template-columns: 1fr auto;
-  align-items:center;
-  column-gap:12px;
+  align-items: center;
+  column-gap: 12px;
 }
 
-/* 左側の要素（タブバーと状態）は左カラムへ */
+/* 左カラム：タブ＆状態 */
 .header .inner > .tabbar { grid-column: 1; }
-.header .inner > .row.mini:first-of-type { grid-column: 1; } /* 状態: 内蔵辞書 ... */
+.header .inner > .row.mini:first-of-type { grid-column: 1; }
 
-/* 右側の要素（プロ版ボタンの行）は右カラムへ */
+/* 右カラム：プロ版ボタンの行 */
 .header .inner > .row.mini:last-of-type{
   grid-column: 2;
-  justify-self: end;           /* 右端に寄せる */
+  justify-self: end;     /* ← 右端にピタッ */
 }
 
-/* 余計な行マージンがあれば詰める（任意） */
-.header .inner > .row.mini{ margin: 0; }
-
-/* スマホで崩れる場合の保険（任意） */
-@media (max-width: 640px){
-  .header .inner{
-    grid-template-columns: 1fr auto;
-  }
-  .header .tabbar{ overflow:auto; }
-}
+/* ボタン自体は通常フローでOK（absolute禁止） */
+.pro-btn{ position: static; white-space: nowrap; }
