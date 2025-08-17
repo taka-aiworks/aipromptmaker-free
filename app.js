@@ -82,7 +82,8 @@ const SOLO_NEG = [
   "group",             // グループ・集合
   "crowd",             // 群衆
   "twins",             // 双子などペア要素
-  "background people"  // 背景に人が映り込む
+  "background people",  // 背景に人が映り込む
+  "text on clothes"    // （任意）服の文字を消したい
 ];
 
 // 背景が人混みに寄りやすいタグ → “無人化”の弱い補正を足す
