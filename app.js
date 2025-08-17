@@ -55,6 +55,49 @@ function withSoloNegatives(negText) {
   return [...new Set([...base, ...add])].join(", ");
 }
 
+/* === ソロ強制ガード（複数人対策） ======================= */
+const SOLO_POS = ["solo"]; // 1人明示
+const SOLO_NEG = [
+  "2girls","two girls","3girls","multiple girls","2boys","two boys",
+  "two people","three people","multiple people","group","crowd","duo","trio",
+  "pair","couple","twins","twin","roommates","bandmates","classmates","teammates",
+  "master and servant","mentor and pupil","idol and fan",
+  "background people","people in background","bystanders","photobomb"
+];
+
+// 背景が人混みに寄りやすいタグ → “無人化”の弱い補正を足す
+const MULTI_RISK_BG = new Set([
+  "festival stalls","shrine festival","street at night","classroom",
+  "train platform","beach","rooftop","library","caf\u00e9","snowy town",
+]);
+
+function forceSoloPos(parts){
+  const s = new Set(parts.filter(Boolean));
+  SOLO_POS.forEach(t => s.add(t));
+  for (const t of parts) {
+    if (MULTI_RISK_BG.has(String(t))) {
+      s.add("no crowd");
+      s.add("empty background");
+      break;
+    }
+  }
+  return [...s];
+}
+
+// ネガに複数人ブロックを必ず混ぜる
+function withSoloNeg(neg){
+  const base = (neg || "").split(",").map(s=>s.trim()).filter(Boolean);
+  const merged = new Set([...base, ...SOLO_NEG]);
+  return [...merged].join(", ");
+}
+
+// 複数人を示唆しがちな語を“念のため”落とす（プロンプト側）
+const MULTI_HINT_RE = /\b(duo|trio|group|crowd|pair|couple|twins?|roommates|bandmates|classmates|teammates|mentor and pupil|master and servant|idol and fan|two people|three people|multiple people)\b/i;
+function stripMultiHints(parts){
+  return parts.filter(t => !MULTI_HINT_RE.test(String(t)));
+}
+
+
 /* ========= 設定（LocalStorage） ========= */
 const LS_KEY = "LPM_SETTINGS_V1";
 const Settings = { gasUrl: "", gasToken: "" };
@@ -642,7 +685,8 @@ function initWheel(wId,tId,sId,lId,swId,tagId,baseTag){
     thumb.style.left = (rect.width/2  + r*Math.cos(rad) - 7) + "px";
     thumb.style.top  = (rect.height/2 + r*Math.sin(rad) - 7) + "px";
   });
-  return ()=> $(tagId).textContent;
+   // initWheel の最後の return をこれに
+   return ()=> (($(tagId).textContent) || "").trim();
 }
 
 /*
@@ -1301,10 +1345,16 @@ function buildOneLearning(extraSeed = 0){
 
   parts = applyNudePriority(parts);
   parts = pairWearColors(parts);
+
+  // ★ここから追加
+  parts = stripMultiHints(parts);
+  parts = forceSoloPos(parts);
+  // ★ここまで
+   
   const pos = ensurePromptOrder(parts);
   const seed = seedFromName($("#charName").value||"", extraSeed); // ←ここでズラす
   // ★ 複数人抑止ネガを付足
-  const neg = withSoloNegatives(getNeg());
+  const neg = withSoloNeg(getNeg());
   return {seed, pos, neg, text:`${pos.join(", ")} --neg ${neg} seed:${seed}`};
 
 }
@@ -1576,10 +1626,16 @@ function buildBatchProduction(n){
     let all = uniq([...fixed, ...parts]).filter(Boolean);
     all = applyNudePriority(all);
     all = pairWearColors(all);
+
+    // ★ここから追加：ソロ強制＆複数人ヒント除去
+    all = stripMultiHints(all);
+    all = forceSoloPos(all);
+    // ★ここまで
+     
     const prompt = ensurePromptOrder(all).join(", ");
 
     const seed = (seedMode === "fixed") ? baseSeed : seedFromName($("#charName").value||"", i);
-    return { key: `${prompt}|${seed}`, seed, prompt, neg };
+    return { key: `${prompt}|${seed}`, seed, prompt, neg: withSoloNeg(negBase) };
   };
 
   // ユニーク優先
