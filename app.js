@@ -1466,17 +1466,7 @@ function ensurePromptOrder(parts) {
    
    // 服・アクセ（色付き服も outfit に寄せる想定）
    // ensurePromptOrder 内の WEAR_NAME_RE をこれに差し替え
-    const WEAR_NAME_RE = /\b(
-      t-?shirt|shirt|blouse|hoodie|sweater|cardigan|jacket|coat|trench\ coat|
-      tank\ top|camisole|turtleneck|off-shoulder\ top|crop\ top|sweatshirt|blazer|
-      skirt|pleated\ skirt|long\ skirt|hakama|shorts|pants|jeans|trousers|leggings|overalls|bermuda\ shorts|
-      dress|one[-\s]?piece|sundress|gown|kimono(?:\s+dress)?|yukata|cheongsam|qipao|hanbok|sari|lolita\ dress|kimono\ dress|
-      swimsuit|bikini|leotard|
-      (?:school|sailor|blazer|nurse|maid|waitress)\s+uniform|maid\s+outfit|
-      tracksuit|sportswear|jersey|
-      robe|poncho|cape|
-      shoes|boots|heels|sandals|sneakers|loafers|mary\ janes|geta|zori
-   )\b/i;
+   const WEAR_NAME_RE = /\b(t-?shirt|shirt|blouse|hoodie|sweater|cardigan|jacket|coat|trench\ coat|tank\ top|camisole|turtleneck|off-shoulder\ top|crop\ top|sweatshirt|blazer|skirt|pleated\ skirt|long\ skirt|hakama|shorts|pants|jeans|trousers|leggings|overalls|bermuda\ shorts|dress|one[-\s]?piece|sundress|gown|kimono(?:\s+dress)?|yukata|cheongsam|qipao|hanbok|sari|lolita\ dress|kimono\ dress|swimsuit|bikini|leotard|(?:school|sailor|blazer|nurse|maid|waitress)\s+uniform|maid\s+outfit|tracksuit|sportswear|jersey|robe|poncho|cape|shoes|boots|heels|sandals|sneakers|loafers|mary\ janes|geta|zori)\b/i;
    if (S.outfit.has(t) || WEAR_NAME_RE.test(t)) { buckets.wear.push(t); continue; }
    if (S.acc.has(t)) { buckets.acc.push(t); continue; }
 
