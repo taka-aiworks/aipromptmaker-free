@@ -1635,7 +1635,7 @@ function buildBatchProduction(n){
     const prompt = ensurePromptOrder(all).join(", ");
 
     const seed = (seedMode === "fixed") ? baseSeed : seedFromName($("#charName").value||"", i);
-    return { key: `${prompt}|${seed}`, seed, prompt, neg: withSoloNeg(negBase) };
+    return { key: `${prompt}|${seed}`, seed, prompt, neg: withSoloNeg(neg) };
   };
 
   // ユニーク優先
