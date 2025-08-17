@@ -36,6 +36,26 @@ function seedFromName(nm, extra = 0) {
   return h >>> 0;
 }
 
+/* ========= 無料版用 ========= */
+// 文字・値をいじる
+const el = document.getElementById('someId');
+if (el) el.textContent = '...';
+
+// スタイル/クラス切り替え
+const box = document.querySelector('.some');
+if (box) box.classList.toggle('is-disabled', true);
+
+// イベント登録
+const btn = document.getElementById('btnX');
+if (btn) btn.addEventListener('click', onClick);
+
+// --- safe DOM helpers ---
+const on    = (sel, ev, fn) => { const el = $(sel); if (el) el.addEventListener(ev, fn); };
+const text  = (sel, v)      => { const el = $(sel); if (el) el.textContent = v; };
+const show  = (sel, on)     => { const el = $(sel); if (el) el.hidden = !on; };
+const css   = (sel, cls, on)=> { const el = $(sel); if (el) el.classList.toggle(cls, !!on); };
+
+
 // --- 学習テスト専用: 性別から 1girl / 1boy を決める ---
 function getGenderCountTag() {
   const g = document.querySelector('input[name="bf_gender"]:checked')?.value?.toLowerCase() || "";
@@ -1860,51 +1880,52 @@ function initNSFWStatusBadge(){
   update();
 }
 
-function initAll(){
+function isFreeMode() {
+  // productionパネルがロックされてたらFREE扱い
+  const prod = $('#panelProduction');
+  return !prod || prod.classList.contains('is-disabled');
+}
+
+function initAll() {
   if (window.__LPM_INITED) return;
   window.__LPM_INITED = true;
 
-  loadSettings();
-  initTabs();
-  bindDictIO();
-  bindCharIO();
-  bindNSFWToggles();
-  bindLearnTest(); 
-  bindLearnBatch();
-  bindProduction();
-  bindGASTools();
+  loadSettings?.();
+  initTabs?.();
+  bindDictIO?.();
+  bindCharIO?.();
+  bindNSFWToggles?.();
+  bindLearnTest?.();
+  bindLearnBatch?.();
+  bindGASTools?.();
 
-  bindBottomCategoryRadios();
+  bindBottomCategoryRadios?.();
 
-   // まず一回バインドしておく（辞書ロード前でもOKなものだけ拾える）
-  bindOneTestUI();
-  updateOneTestReady();
+  loadDefaultDicts?.().then(() => {
+    renderSFW?.();
+    bindBottomCategoryGuess?.();
+    fillAccessorySlots?.();
+    renderNSFWLearning?.();
+    renderNSFWProduction?.();
+    initHairEyeAndAccWheels?.();
 
-   
-  loadDefaultDicts().then(()=>{
-    renderSFW();
-    bindBottomCategoryGuess();
-    fillAccessorySlots();
-    renderNSFWLearning();
-    renderNSFWProduction();
-    initHairEyeAndAccWheels();
+    // カラーホイール（固定色）
+    initColorWheel?.('top', 35, 80, 55);
+    initColorWheel?.('bottom', 210, 70, 50);
+    initColorWheel?.('shoes', 0, 0, 30);
 
-    // 色系
-    // 基本情報タブの「服カラー（固定）」3つを初期化
-     initColorWheel("top",    35, 80, 55);
-     initColorWheel("bottom",210, 70, 50); 
-     initColorWheel("shoes",   0,  0, 30);
+    // 量産側の色ホイールはFREEならスキップ（無いので）
+    if (!isFreeMode()) {
+      initColorWheel?.('p_top', 35, 80, 55);
+      initColorWheel?.('p_bottom', 210, 70, 50);
+      initColorWheel?.('p_shoes', 0, 0, 30);
+    }
 
-     // 生産タブ（量産の基本色）
-    initColorWheel("p_top",    35, 80, 55); // ← 追加
-    initColorWheel("p_bottom",210, 70, 50); // ← 追加
-    initColorWheel("p_shoes",   0,  0, 30); // ← 追加
+    initSkinTone?.();
+    initNSFWStatusBadge?.();
 
-    initSkinTone();
-    initNSFWStatusBadge();
-         // もう一度確実に（重複登録しても安全なコードなのでOK）
-    bindOneTestUI();
-    updateOneTestReady();
+    bindOneTestUI?.();
+    updateOneTestReady?.();
   });
 }
 
@@ -1944,9 +1965,3 @@ function bindOneTestUI(){
   // 初回判定
   updateOneTestReady();
 }
-
-// 既存の初期化の最後にこれを呼ぶ
-document.addEventListener("DOMContentLoaded", ()=>{
-  // ...既存の init / bind 系...
-  bindOneTestUI();
-});
