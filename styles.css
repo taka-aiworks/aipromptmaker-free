@@ -716,13 +716,27 @@ legend { display: none; }
 
 
 .ad-container {
-  display: flex;         /* 横並びにする */
-  gap: 10px;             /* 広告どうしの余白 */
-  justify-content: center; /* 中央寄せ */
-  flex-wrap: wrap;       /* 画面が狭い時は折り返し */
+  display: flex;
+  justify-content: center;  /* 真ん中寄せ */
+  gap: 12px;                /* 広告の間隔 */
+  flex-wrap: wrap;          /* 狭い時は折り返し */
 }
 
+.ad-item {
+  flex: 0 0 auto;           
+  display: flex;            /* 子の中身を中央寄せ */
+  justify-content: center;
+  align-items: center;
+  background: #fff;         /* なくてもOK、デバッグ用 */
+  border: 1px solid transparent; /* 枠を揃える補助 */
+  width: 300px;             /* 全部300幅に固定 */
+  height: 250px;            /* 高さも固定で揃える */
+}
+
+.ad-item ins,
+.ad-item iframe,
 .ad-item img {
-  width: 200px;  /* 広告画像の幅を調整 */
-  height: auto;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
 }
