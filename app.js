@@ -36,6 +36,25 @@ function seedFromName(nm, extra = 0) {
   return h >>> 0;
 }
 
+// --- 学習テスト専用: 性別から 1girl / 1boy を決める ---
+function getGenderCountTag() {
+  const g = document.querySelector('input[name="bf_gender"]:checked')?.value?.toLowerCase() || "";
+  if (!g) return "";
+  if (/\b(female|girl|woman|feminine|女子|女性)\b/.test(g)) return "1girl";
+  if (/\b(male|boy|man|masculine|男子|男性)\b/.test(g))     return "1boy";
+  return ""; // 中立なら solo のみ
+}
+
+// --- 学習テスト専用: 複数人を抑止するネガティブを付足 ---
+function withSoloNegatives(negText) {
+  const add = [
+    "2girls", "2boys", "two people", "multiple people", "group",
+    "crowd", "duo", "trio"
+  ];
+  const base = (negText || "").split(",").map(s=>s.trim()).filter(Boolean);
+  return [...new Set([...base, ...add])].join(", ");
+}
+
 /* ========= 設定（LocalStorage） ========= */
 const LS_KEY = "LPM_SETTINGS_V1";
 const Settings = { gasUrl: "", gasToken: "" };
@@ -1273,12 +1292,21 @@ function buildOneLearning(extraSeed = 0){
   const BG = getMany("bg"), PO=getMany("pose"), EX=getMany("expr"), LI=getMany("lightLearn");
   const addon = getSelectedNSFW_Learn();
   const b = pick(BG), p = pick(PO), e=pick(EX), l = LI.length ? pick(LI) : "";
-  let parts = uniq([...fixed, b, p, e, l, ...addon]).filter(Boolean);
+  // ★ 常に1人：solo と 1girl/1boy（性別未選択なら solo のみ）
+  const partsSolo = ["solo"];
+  const genderCount = getGenderCountTag(); // "1girl" / "1boy" / ""
+  if (genderCount) partsSolo.push(genderCount);
+
+  let parts = uniq([...partsSolo, ...fixed, b, p, e, l, ...addon]).filter(Boolean);
+
   parts = applyNudePriority(parts);
   parts = pairWearColors(parts);
   const pos = ensurePromptOrder(parts);
   const seed = seedFromName($("#charName").value||"", extraSeed); // ←ここでズラす
-  return {seed, pos, neg:getNeg(), text:`${pos.join(", ")} --neg ${getNeg()} seed:${seed}`};
+  // ★ 複数人抑止ネガを付足
+  const neg = withSoloNegatives(getNeg());
+  return {seed, pos, neg, text:`${pos.join(", ")} --neg ${neg} seed:${seed}`};
+
 }
 
 function buildBatchLearning(n){
