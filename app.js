@@ -1294,7 +1294,7 @@ function pairWearColors(parts){
   // 服名検出用
   const topRe     = /\b(t-?shirt|shirt|blouse|hoodie|sweater|cardigan|jacket|coat|trench coat|tank top|camisole|turtleneck|off-shoulder top|crop top|sweatshirt)\b/i;
   const bottomRe  = /\b(skirt|pleated skirt|long skirt|hakama|shorts|pants|jeans|trousers|leggings|overalls|bermuda shorts)\b/i;
-  const dressRe   = /\b(dress|one[-\s]?piece|sundress|gown|kimono(?:\s+dress)?|yukata|cheongsam|qipao|lolita\s+dress)\b/i;
+  const dressRe = /\b(dress|one[-\s]?piece|sundress|gown|kimono(?:\s+dress)?|yukata|cheongsam|qipao|lolita\s+dress|(?:school|sailor|blazer|nurse|maid|waitress)\s+uniform|maid\s+outfit|tracksuit|sportswear|jersey|robe|poncho|cape)\b/i;
   const shoesRe   = /\b(shoes|boots|heels|sandals|sneakers|loafers|mary janes|geta|zori)\b/i;
 
   // マッチした文字列から「素の名詞」を抜き出す（色や形容は捨てる）
