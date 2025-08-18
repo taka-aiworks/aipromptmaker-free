@@ -3,6 +3,20 @@
    （分割版 / 軽量化込み）
    ========================= */
 
+
+/* ========= ユーティリティ & 状態 ========= */
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+const toast = (msg) => {
+  const t = $("#toast");
+  if (!t) { console.log(msg); return; }
+  t.textContent = msg;
+  t.hidden = false;
+  setTimeout(() => (t.hidden = true), 1500);
+};
+
+
 /* ========= 無料版制限 ========= */
 
 const FREE_TIER = true;
@@ -65,18 +79,6 @@ if (FREE_TIER) {
 
 /* ========= 無料版制限ここまで ========= */
 
-
-/* ========= ユーティリティ & 状態 ========= */
-const $  = (s) => document.querySelector(s);
-const $$ = (s) => Array.from(document.querySelectorAll(s));
-
-const toast = (msg) => {
-  const t = $("#toast");
-  if (!t) { console.log(msg); return; }
-  t.textContent = msg;
-  t.hidden = false;
-  setTimeout(() => (t.hidden = true), 1500);
-};
 
 function dl(filename, text) {
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
