@@ -2329,35 +2329,38 @@ function initAll(){
   initTabs();
   bindDictIO();
   bindCharIO();
-  bindNSFWToggles();
   bindLearnTest();
   bindLearnBatch();
-  bindProduction();
-  bindGASTools();
+  if (!FREE_TIER) {
+    bindProduction();
+    bindGASTools();
+  }
 
   bindBottomCategoryRadios();
 
-   
   loadDefaultDicts().then(()=>{
     renderSFW();
     bindBottomCategoryGuess();
     fillAccessorySlots();
-    renderNSFWLearning();
-    renderNSFWProduction();initHairEyeAndAccWheels(); // ← 髪/瞳/アクセのピッカーとトグル連動をまとめて初期化
+    if (!FREE_TIER) {
+      renderNSFWLearning();
+      renderNSFWProduction();
+    }
+    initHairEyeAndAccWheels();
 
-    // 色系
-    // 基本情報タブの「服カラー（固定）」3つを初期化
-     initColorWheel("top",    35, 80, 55);
-     initColorWheel("bottom",210, 70, 50); 
-     initColorWheel("shoes",   0,  0, 30);
+    // 色系（固定分だけ）
+    initColorWheel("top",35,80,55);
+    initColorWheel("bottom",210,70,50); 
+    initColorWheel("shoes",0,0,30);
 
-     // 生産タブ（量産の基本色）
-    initColorWheel("p_top",    35, 80, 55); // ← 追加
-    initColorWheel("p_bottom",210, 70, 50); // ← 追加
-    initColorWheel("p_shoes",   0,  0, 30); // ← 追加
+    if (!FREE_TIER){
+      initColorWheel("p_top",35,80,55);
+      initColorWheel("p_bottom",210,70,50);
+      initColorWheel("p_shoes",0,0,30);
+    }
 
     initSkinTone();
-    initNSFWStatusBadge();
+    if (!FREE_TIER) initNSFWStatusBadge();
   });
 }
 
