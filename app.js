@@ -26,10 +26,11 @@ const toast = (msg) => {
     outfit:[], accessories:[], background:[], pose_composition:[], expressions:[], lighting:[],
     age:[], gender:[], body_type:[], height:[], personality:[], worldview:[], speech_tone:[]
   };
-  // EMBED_SFW が無くても落ちないように
-  let SFW;
-  try { SFW = JSON.parse(JSON.stringify(EMBED_SFW)); }
-  catch { SFW = JSON.parse(JSON.stringify(EMPTY_SFW)); }
+ 
+// EMBED_SFW が無くても落ちないように
+   let SFW = (typeof EMBED_SFW !== "undefined" && EMBED_SFW)
+     ? JSON.parse(JSON.stringify(EMBED_SFW))
+     : JSON.parse(JSON.stringify(EMPTY_SFW));
 
 let NSFW = normNSFW(EMBED_NSFW);
 
@@ -58,14 +59,15 @@ if (FREE_TIER) {
 }
 
 if (FREE_TIER) {
-  // ダウンロード/クラウド/設定保存/辞書I/Oは封鎖
-  window.dl = function(){ toast("無料版ではダウンロード不可"); };
-  window.postCSVtoGAS = async function(){ toast("無料版ではクラウド不可"); throw new Error("cloud disabled"); };
-  window.saveSettings = function(){ toast("無料版では保存不可"); };
-  window.resetSettings = function(){};
-  window.bindGASTools = function(){};
-  window.bindDictIO = function(){};
-  window.bindCharIO = function(){};
+    // ダウンロード/クラウド/設定保存/辞書I/Oは封鎖（グローバル関数を直接呼ぶ側がいても落ちないよう stub 化）
+    window.dl = window.dl || function(){ toast("無料版ではダウンロード不可"); };
+    window.postCSVtoGAS = window.postCSVtoGAS || (async function(){ toast("無料版ではクラウド不可"); throw new Error("cloud disabled"); });
+    window.saveSettings = window.saveSettings || function(){ toast("無料版では保存不可"); };
+    window.resetSettings = window.resetSettings || function(){};
+    window.bindGASTools = window.bindGASTools || function(){};
+    window.bindDictIO = window.bindDictIO || function(){};
+    window.bindCharIO = window.bindCharIO || function(){};
+ }
 
   // クリップボードは**許可**（1枚テストのコピーで使うため）
   // navigator.clipboard.writeText は上書きしない
@@ -81,14 +83,14 @@ if (FREE_TIER) {
   window.bindLearnBatch       = function(){};
   window.bindProduction       = function(){};
 }
-   
-if (FREE_TIER) {
-  NSFW = { expression:[], exposure:[], situation:[], lighting:[] };
-  window.renderNSFWLearning   = function(){};
-  window.renderNSFWProduction = function(){};
-  window.bindNSFWToggles      = function(){};
-  window.getSelectedNSFW_Learn = function(){ return []; };
-}
+  if (FREE_TIER) {
+    // NSFW と NSFW UI は無料版では常に無効
+    try { NSFW.expression = []; NSFW.exposure = []; NSFW.situation = []; NSFW.lighting = []; } catch {}
+    window.renderNSFWLearning    = function(){};
+    window.renderNSFWProduction  = function(){};
+    window.bindNSFWToggles       = function(){};
+    window.getSelectedNSFW_Learn = function(){ return []; };
+  }
 
 /* ========= 無料版制限ここまで ========= */
 
@@ -134,16 +136,6 @@ function getGenderCountTag() {
   if (/\b(female|girl|woman|feminine|女子|女性)\b/.test(g)) return "1girl";
   if (/\b(male|boy|man|masculine|男子|男性)\b/.test(g))     return "1boy";
   return ""; // 中立系（androgynous 等）は solo のみで制御
-}
-
-// --- 学習モード専用: 複数人を抑止するネガティブを付足 ---
-function withSoloNegatives(negText) {
-  const add = [
-    "2girls", "2boys", "two people", "multiple people", "group",
-    "crowd", "duo", "trio"
-  ];
-  const base = (negText || "").split(",").map(s=>s.trim()).filter(Boolean);
-  return uniq([...base, ...add]).join(", ");
 }
 
 /* === ソロ強制ガード（複数人対策） ======================= */
@@ -375,17 +367,6 @@ function resetSettings() {
   $("#gasTestResult") && ($("#gasTestResult").textContent = "初期化しました");
 }
 
-
-  if (FREE_TIER) {
-    // 既存の NSFW 変数を再宣言せず、中身だけ空にする
-    try {
-      NSFW.expression = []; NSFW.exposure = []; NSFW.situation = []; NSFW.lighting = [];
-    } catch {}
-    window.renderNSFWLearning    = function(){};
-    window.renderNSFWProduction  = function(){};
-    window.bindNSFWToggles       = function(){};
-    window.getSelectedNSFW_Learn = function(){ return []; };
-  }
 
 /* ========= 正規化 ========= */
 function normItem(x) {
@@ -1767,7 +1748,9 @@ function buildOneLearning(extraSeed = 0){
   const genderCount = getGenderCountTag(); // "1girl" / "1boy" / ""
   if (genderCount) partsSolo.push(genderCount);
 
-  let parts = uniq([...partsSolo, ...fixed, b, p, e, l, ...addon]).filter(Boolean);
+   let parts = uniq([...partsSolo, ...fixed, b, p, e, l, ...addon]).filter(Boolean);
+   // 足りないカテゴリにだけ安全なアンカーを自動補完
+   parts = addLearningAnchorsIfMissing(parts);
 
   // ===== 2) 服の整合、露出優先などの既存ルール =====
   parts = applyNudePriority(parts);
