@@ -526,9 +526,26 @@ function listMissingForOneTest() {
     const bottomPicked = getOne("outfit_pants") || getOne("outfit_skirt");
     if (!bottomPicked) miss.push("ボトム（必須）");
   }
-   // 全角/半角どちらの「(任意)」「（任意）」も除外
-   const OPTIONAL_RE = /[（(]\s*任意\s*[)）]$/;
-   return miss.filter(x => !OPTIONAL_RE.test(x));
+
+  // 全角/半角どちらの「(任意)」「（任意）」も除外
+  const OPTIONAL_RE = /[（(]\s*任意\s*[)）]$/;
+  return miss.filter(x => !OPTIONAL_RE.test(x));
+}
+
+// ===== 1枚テスト: ボタンの有効/無効制御 =====
+function updateOneTestReady() {
+  const btn = $("#btnOneLearn");
+  if (!btn) return;
+
+  const miss = listMissingForOneTest();
+  const ok = miss.length === 0;
+
+  btn.disabled = !ok;
+  btn.classList.toggle("disabled", !ok);
+  btn.title = ok ? "" : ("不足: " + miss.join(" / "));
+
+  const hint = document.getElementById("readyHint");
+  if (hint) hint.textContent = ok ? "" : ("不足: " + miss.join(" / "));
 }
 
 function isBasicReadyForOneTest(){ return listMissingForOneTest().length === 0; }
