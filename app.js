@@ -526,7 +526,8 @@ function listMissingForOneTest() {
     const bottomPicked = getOne("outfit_pants") || getOne("outfit_skirt");
     if (!bottomPicked) miss.push("ボトム（必須）");
   }
-
+console.log("MISSING", miss);
+  return miss;
   // 任意は不足扱いにしない
   return miss.filter(x => !/（任意）$/.test(x));
 }
