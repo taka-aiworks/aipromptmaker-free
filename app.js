@@ -362,11 +362,18 @@ function resetSettings() {
 }
 
 /* ========= 内蔵辞書（空で開始） ========= */
-const EMBED_SFW = { hair_style:[], eyes:[], outfit:[], face:[], skin_body:[], art_style:[], background:[], pose_composition:[], expressions:[], accessories:[], lighting:[], age:[], gender:[], body_type:[], height:[], personality:[], worldview:[], speech_tone:[] };
+// 内蔵辞書の直後にまとめる
 const EMBED_NSFW = { categories:{ expression:[], exposure:[], situation:[], lighting:[] } };
-
 let SFW  = JSON.parse(JSON.stringify(EMBED_SFW));
 let NSFW = normNSFW(EMBED_NSFW);
+
+// ↓ここから無料版の無効化をかける（代入ではなく中身を空にする）
+if (FREE_TIER) {
+  NSFW.expression = [];
+  NSFW.exposure   = [];
+  NSFW.situation  = [];
+  NSFW.lighting   = [];
+}
 
 /* ========= 正規化 ========= */
 function normItem(x) {
