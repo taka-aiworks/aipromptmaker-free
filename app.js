@@ -52,7 +52,6 @@ if (FREE_TIER) {
   window.bindGASTools = function(){};
   window.bindDictIO = function(){};
   window.bindCharIO = function(){};
-  window.loadDefaultDicts = async function(){};
 
   // クリップボードは**許可**（1枚テストのコピーで使うため）
   // navigator.clipboard.writeText は上書きしない
