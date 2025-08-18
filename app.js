@@ -3,10 +3,6 @@
    （分割版 / 軽量化込み）
    ========================= */
 
-// コンソール出力を全部アラートで見るハック
-console.log = function(...args){
-  alert(args.map(a => (typeof a === "object" ? JSON.stringify(a) : a)).join(" "));
-};
 
 /* ========= ユーティリティ & 状態 ========= */
 const $  = (s) => document.querySelector(s);
@@ -956,6 +952,7 @@ function initWheel(wId,tId,sId,lId,swId,tagId,baseTag){
     sw.style.background = `#${[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("")}`;
     const cname = colorNameFromHSL(hue, s, l);
     tagEl.textContent = `${cname} ${baseTag}`;
+    if (typeof updateOneTestReady === "function") updateOneTestReady();
   }
   const onHue = (h)=>{ hue = h; onHue.__lastHue = h; paint(); };
   onHue.__lastHue = hue;
@@ -1083,6 +1080,7 @@ function initColorWheel(idBase, defaultHue=0, defaultS=80, defaultL=50){
     const [r,g,b]=hslToRgb(hue,s,l);
     sw.style.background = `rgb(${r},${g},${b})`;
     tag.textContent = colorNameFromHSL(hue,s,l);
+    if (typeof updateOneTestReady === "function") updateOneTestReady();
   }
   const onHue = (h)=>{ hue = h; onHue.__lastHue = h; paint(); };
   onHue.__lastHue = hue;
@@ -1536,16 +1534,16 @@ function bindNSFWToggles(){
 
 /* ========= 肌トーン描画 ========= */
 function paintSkin(){
-    const v   = +($("#skinTone").value||0);
-    const hex = toneToHex(v);
-    const tag = toneToTag(v);
-    $("#swSkin").style.background = hex;
-    const label = $("#tagSkin");
-    label.textContent = tag;
-    // ← 文字色は変えない（過去につけたインライン色があれば消す）
-    label.style.color = "";
-    // または label.style.removeProperty("color");
-  }
+  const v = +($("#skinTone").value||0);
+  const hex = toneToHex(v);
+  const tag = toneToTag(v);
+  $("#swSkin").style.background = hex;
+  const label = $("#tagSkin");
+  label.textContent = tag;
+  label.style.color = "";
+  // ▼ これを追加
+  if (typeof updateOneTestReady === "function") updateOneTestReady();
+}
 
 /* ========= アクセ色相環 ========= */
 let getHairColorTag, getEyeColorTag, getLearnAccColor, getAccAColor, getAccBColor, getAccCColor;
