@@ -541,6 +541,8 @@ function updateOneTestReady(){
   btn.disabled = !ok;
   btn.classList.toggle("disabled", !ok);
   btn.title = ok ? "" : ("不足: " + miss.join(" / "));
+  const hint = document.getElementById("readyHint");
+  if (hint) hint.textContent = ok ? "" : ("不足: " + miss.join(" / "));
 }
 
 function autoFillRequiredOnce(){
