@@ -67,8 +67,6 @@ if (FREE_TIER) {
     window.bindGASTools = window.bindGASTools || function(){};
     window.bindDictIO = window.bindDictIO || function(){};
     window.bindCharIO = window.bindCharIO || function(){};
- }
-
   // クリップボードは**許可**（1枚テストのコピーで使うため）
   // navigator.clipboard.writeText は上書きしない
 }
@@ -102,7 +100,7 @@ function dl(filename, text) {
   a.href = url; a.download = filename; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 500);
 }
-const uniq = (a) => [...new Set(a.filter(Boolean))];
+const uniq = (a) => [...new Set((a || []).filter(Boolean))];
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 function nowStamp() {
   const d = new Date(), z = (n) => String(n).padStart(2, "0");
