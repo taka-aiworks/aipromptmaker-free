@@ -362,18 +362,28 @@ function resetSettings() {
 }
 
 /* ========= 内蔵辞書（空で開始） ========= */
-// 内蔵辞書の直後にまとめる
-const EMBED_NSFW = { categories:{ expression:[], exposure:[], situation:[], lighting:[] } };
-let SFW  = JSON.parse(JSON.stringify(EMBED_SFW));
-let NSFW = normNSFW(EMBED_NSFW);
+  const EMBED_NSFW = { categories:{ expression:[], exposure:[], situation:[], lighting:[] } };
+  const EMPTY_SFW = {
+    hair_style:[], eyes:[], face:[], skin_body:[], art_style:[],
+    outfit:[], accessories:[], background:[], pose_composition:[], expressions:[], lighting:[],
+    age:[], gender:[], body_type:[], height:[], personality:[], worldview:[], speech_tone:[]
+  };
+  // EMBED_SFW が無くても落ちないように
+  let SFW;
+  try { SFW = JSON.parse(JSON.stringify(EMBED_SFW)); }
+  catch { SFW = JSON.parse(JSON.stringify(EMPTY_SFW)); }
+  let NSFW = normNSFW(EMBED_NSFW);
 
-// ↓ここから無料版の無効化をかける（代入ではなく中身を空にする）
-if (FREE_TIER) {
-  NSFW.expression = [];
-  NSFW.exposure   = [];
-  NSFW.situation  = [];
-  NSFW.lighting   = [];
-}
+  if (FREE_TIER) {
+    // 既存の NSFW 変数を再宣言せず、中身だけ空にする
+    try {
+      NSFW.expression = []; NSFW.exposure = []; NSFW.situation = []; NSFW.lighting = [];
+    } catch {}
+    window.renderNSFWLearning    = function(){};
+    window.renderNSFWProduction  = function(){};
+    window.bindNSFWToggles       = function(){};
+    window.getSelectedNSFW_Learn = function(){ return []; };
+  }
 
 /* ========= 正規化 ========= */
 function normItem(x) {
@@ -2185,8 +2195,11 @@ async function loadDefaultDicts(){
   const sfw = await tryFetch("dict/default_sfw.json");
   if(sfw){ mergeIntoSFW(sfw); renderSFW(); fillAccessorySlots(); toast("SFW辞書を読み込みました"); }
   const nsfw = await tryFetch("dict/default_nsfw.json");
-  if(nsfw){ mergeIntoNSFW(nsfw); renderNSFWProduction(); renderNSFWLearning(); toast("NSFW辞書を読み込みました"); }
-}
+  if(nsfw && !FREE_TIER){
+    mergeIntoNSFW(nsfw);
+    renderNSFWProduction(); renderNSFWLearning();
+    toast("NSFW辞書を読み込みました");
+  }
 
 /* ========= ボタン等のイベント ========= */
 function bindLearnTest(){
