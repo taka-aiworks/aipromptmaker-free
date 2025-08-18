@@ -2,7 +2,9 @@
    LoRA Prompt Maker – app.js
    （分割版 / 軽量化込み）
    ========================= */
-
+console.log = function(...args){
+  alert(JSON.stringify(args));
+}
 
 /* ========= ユーティリティ & 状態 ========= */
 const $  = (s) => document.querySelector(s);
