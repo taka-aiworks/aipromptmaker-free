@@ -2241,26 +2241,7 @@ function bindLearnBatch(){
 }
 
 function bindProduction(){
-  $("#btnGenProd")?.addEventListener("click", ()=>{
-    const cnt=parseInt($("#countProd").value,10)||50;
-    const rows = buildBatchProduction(cnt);
-    renderProdTable(rows); renderProdText(rows);
-  });
-  $("#btnCopyProd")?.addEventListener("click", ()=>{
-    const r=document.createRange(); r.selectNodeContents($("#outProd")); const s=getSelection();
-    s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); s.removeAllRanges(); toast("量産セットをコピーしました");
-  });
-  $("#btnCsvProd")?.addEventListener("click", ()=>{
-    const csv = csvFromProd("#fmtProd");
-    if(!csv || csv.split("\n").length<=1){ toast("量産テーブルが空です"); return; }
-    const char = ($("#charName")?.value||"noname").replace(/[^\w\-]/g,"_");
-    dl(`production_${char}_${nowStamp()}.csv`, csv); toast("量産セットをローカル（CSV）に保存しました");
-  });
-  $("#btnCloudProd")?.addEventListener("click", async ()=>{
-    const csv = csvFromProd("#fmtProd");
-    if(!csv || csv.split("\n").length<=1){ toast("量産テーブルが空です"); return; }
-    await postCSVtoGAS("production", csv);
-  });
+
 }
 
 /* ===== ここから追記：総合初期化 ===== */
