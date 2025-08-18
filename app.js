@@ -2375,8 +2375,77 @@ function bindOneTestUI(){
   updateOneTestReady();
 }
 
-// 既存の初期化の最後にこれを呼ぶ
-document.addEventListener("DOMContentLoaded", ()=>{
-  // ...既存の init / bind 系...
-  bindOneTestUI();
+/* =========================
+   安全初期化ブロック（貼り替え用）
+   ========================= */
+(function initSafely(){
+  // 二重初期化ガード
+  if (window.__LPM_INIT_DONE__) return;
+  window.__LPM_INIT_DONE__ = true;
+
+  // ---- 1) タブ・設定の初期化（存在すれば） ----
+  try { loadSettings?.(); } catch {}
+  try { initTabs?.(); } catch {}
+
+  // ---- 2) SFW辞書の描画（存在すれば） ----
+  try { renderSFW?.(); } catch {}
+
+  // ---- 3) 色ホイールの初期化（存在する要素だけ） ----
+  // 髪/瞳
+  try {
+    if (typeof initWheel === 'function') {
+      // 返り値は「現在の色タグを返すgetter」。無ければダミーにフォールバック
+      getHairColorTag = initWheel("#wheelH","#thumbH","#satH","#litH","#swH","#tagH","hair");
+      getEyeColorTag  = initWheel("#wheelE","#thumbE","#satE","#litE","#swE","#tagE","eyes");
+      if (typeof getHairColorTag !== 'function') getHairColorTag = () => (document.querySelector("#tagH")?.textContent || "").trim();
+      if (typeof getEyeColorTag  !== 'function') getEyeColorTag  = () => (document.querySelector("#tagE")?.textContent || "").trim();
+    }
+  } catch {}
+
+  // アクセ系・服色（学習）
+  try {
+    if (typeof initColorWheel === 'function') {
+      getLearnAccColor = initColorWheel("learnAcc", 20, 70, 55);   // 任意ID。無ければスキップ
+      getOutfitBaseColor = initColorWheel("outfitBase", 0, 0, 50); // 無ければスキップ
+      // 固定服色（top/bottom/shoes）
+      getAccAColor = initColorWheel("p_accA", 0, 70, 50);
+      getAccBColor = initColorWheel("p_accB", 210, 70, 50);
+      getAccCColor = initColorWheel("p_accC", 120, 70, 50);
+      // 固定色: top/bottom/shoes
+      initColorWheel("top",    30, 80, 55);
+      initColorWheel("bottom", 200, 70, 50);
+      initColorWheel("shoes",   0,  0, 30);
+    }
+  } catch {}
+
+  // ---- 4) 肌トーンの描画（スライダがあれば） ----
+  try {
+    const skin = document.getElementById("skinTone");
+    if (skin) {
+      skin.addEventListener("input", paintSkin);
+      paintSkin();
+    }
+  } catch {}
+
+  // ---- 5) 服カテゴリ/カラーのトグルたち（存在すれば） ----
+  try { bindBottomCategoryRadios?.(); } catch {}
+  try { bindWearToggles?.(); } catch {}
+  try { fillAccessorySlots?.(); } catch {}
+
+  // ---- 6) FREE版で触れる範囲のボタンだけバインド ----
+  try { bindLearnTest?.(); } catch {}
+  // bindLearnBatch / bindProduction は FREE_TIER で封鎖済み
+
+  // ---- 7) NSFW UI（FREEでは無効化済みだが念のため） ----
+  try { bindNSFWToggles?.(); } catch {}
+
+  // ---- 8) 初期の “1枚テスト” 実行可否の反映 ----
+  try { updateOneTestReady?.(); } catch {}
+})();
+
+// DOMContentLoaded まで待ってから実行（deferでも安全側に）
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.__LPM_INIT_DONE__) {
+    try { (0, eval)("initSafely && 0"); } catch {} // no-op: 即時IIFEが走る構造なので何もしない
+  }
 });
