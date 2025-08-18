@@ -3,6 +3,11 @@
    （分割版 / 軽量化込み）
    ========================= */
 
+// コンソール出力を全部アラートで見るハック
+console.log = function(...args){
+  alert(args.map(a => (typeof a === "object" ? JSON.stringify(a) : a)).join(" "));
+};
+
 /* ========= ユーティリティ & 状態 ========= */
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
