@@ -19,6 +19,8 @@ const toast = (msg) => {
 
 /* ========= 無料版制限 ========= */
 
+let NSFW = normNSFW(EMBED_NSFW);
+
 const FREE_TIER = true;
 
 if (FREE_TIER) {
@@ -372,7 +374,6 @@ function resetSettings() {
   let SFW;
   try { SFW = JSON.parse(JSON.stringify(EMBED_SFW)); }
   catch { SFW = JSON.parse(JSON.stringify(EMPTY_SFW)); }
-  let NSFW = normNSFW(EMBED_NSFW);
 
   if (FREE_TIER) {
     // 既存の NSFW 変数を再宣言せず、中身だけ空にする
@@ -2200,7 +2201,7 @@ async function loadDefaultDicts(){
     renderNSFWProduction(); renderNSFWLearning();
     toast("NSFW辞書を読み込みました");
   }
-
+}
 /* ========= ボタン等のイベント ========= */
 function bindLearnTest(){
   $("#btnOneLearn")?.addEventListener("click", runOneTest);
