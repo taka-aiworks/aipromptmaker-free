@@ -2184,36 +2184,20 @@ async function loadDefaultDicts(){
     toast("NSFW辞書を読み込みました");
   }
 }
+
 /* ========= ボタン等のイベント ========= */
 function bindLearnTest(){
   $("#btnOneLearn")?.addEventListener("click", runOneTest);
-
   // ← これが“許可する唯一のコピー”
   $("#btnCopyLearnTest")?.addEventListener("click", copyOneTestText);
 }
 
-  /*
-   $("#btnOneLearn")?.addEventListener("click", ()=>{
-    const one = buildOneLearning();
-    if(one.error){ toast(one.error); return; }
-    __lastOneLearn = one;
-    renderLearnTableTo("#tblLearnTest tbody", [one]);
-    renderLearnTextTo("#outLearnTest", [one], "fmtLearn");
-  });
-
-  $("#btnCopyLearnTest")?.addEventListener("click", ()=>{
-    const text = __lastOneLearn ? (__lastOneLearn.pos||[]).join(", ")
-      : ($("#tblLearnTest tbody tr td:nth-child(6)")?.textContent||"");
-    if(!text){ toast("コピー対象がありません"); return; }
-    navigator.clipboard?.writeText(text).then(()=> toast("プロンプトのみコピーしました"))
-      .catch(()=>{
-        const r=document.createRange(); const d=document.createElement("div"); d.textContent=text; document.body.appendChild(d);
-        r.selectNodeContents(d); const s=getSelection(); s.removeAllRanges(); s.addRange(r);
-        document.execCommand("copy"); s.removeAllRanges(); d.remove(); toast("プロンプトのみコピーしました");
-      });
-  });
-  */
-}
+/* ここから下はコメントのままでOK（閉じカッコは追加しない！）
+  //
+  // 旧実装（参考）
+  // $("#btnOneLearn")?.addEventListener("click", ()=>{ ... });
+  // $("#btnCopyLearnTest")?.addEventListener("click", ()=>{ ... });
+*/
 
 function bindLearnBatch(){
   $("#btnBatchLearn")?.addEventListener("click", ()=>{
