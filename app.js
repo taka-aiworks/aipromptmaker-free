@@ -528,9 +528,9 @@ function listMissingForOneTest() {
     const bottomPicked = getOne("outfit_pants") || getOne("outfit_skirt");
     if (!bottomPicked) miss.push("ボトム（必須）");
   }
-console.log("MISSING", miss);
-  // 任意は不足扱いにしない
-  return miss.filter(x => !/（任意）$/.test(x));
+   // 全角/半角どちらの「(任意)」「（任意）」も除外
+   const OPTIONAL_RE = /[（(]\s*任意\s*[)）]$/;
+   return miss.filter(x => !OPTIONAL_RE.test(x));
 }
 
 function isBasicReadyForOneTest(){ return listMissingForOneTest().length === 0; }
