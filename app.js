@@ -543,6 +543,36 @@ function updateOneTestReady(){
   btn.title = ok ? "" : ("不足: " + miss.join(" / "));
 }
 
+function autoFillRequiredOnce(){
+  // outfitMode の状態を見て最低限だけ自動選択
+  const mode = document.querySelector('input[name="outfitMode"]:checked')?.value || "separate";
+
+  const ensureOne = (selector) => {
+    const has = document.querySelector(`${selector} input[type="radio"]:checked`);
+    if (!has) {
+      const first = document.querySelector(`${selector} input[type="radio"]`);
+      if (first) first.checked = true;
+    }
+  };
+
+  if (mode === "onepiece") {
+    ensureOne("#outfit_dress");
+  } else {
+    ensureOne("#outfit_top");
+    // ボトムは pants 優先、無ければ skirt
+    const hasBottom = document.querySelector('input[name="outfit_pants"]:checked') ||
+                      document.querySelector('input[name="outfit_skirt"]:checked');
+    if (!hasBottom) {
+      const p = document.querySelector('#outfit_pants input[type="radio"]');
+      const s = document.querySelector('#outfit_skirt input[type="radio"]');
+      (p || s) && ((p || s).checked = true);
+    }
+  }
+  // 最後にボタンの可否を更新
+  if (typeof updateOneTestReady === "function") updateOneTestReady();
+}
+
+
 // ===== 1枚テスト: 生成 & 描画 =====
 let __lastOneTestRows = []; // フォーマット切替再描画用
 
@@ -2303,6 +2333,7 @@ function initAll(){
     renderSFW();
     bindBottomCategoryGuess();
     fillAccessorySlots();
+    autoFillRequiredOnce();
     if (!FREE_TIER) {
       renderNSFWLearning();
       renderNSFWProduction();
