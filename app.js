@@ -492,13 +492,9 @@ function bindBottomCategoryRadios(){
   swap(); // 初期反映（パンツ既定→スカート側を無効）
 }
 
-// ===== 1枚テスト: 必須チェック =====
+// ===== 1枚テスト: 必須チェック（キャラ名は任意） =====
 function listMissingForOneTest() {
   const miss = [];
-
-  // 名前（seed固定用）
-  const name = ($("#charName")?.value || "").trim();
-  if (!name) miss.push("キャラ名");
 
   // 色タグ（髪・瞳・肌）
   const hairTag = ($("#tagH")?.textContent || "").trim();
@@ -512,12 +508,12 @@ function listMissingForOneTest() {
   if (!getOne("hairStyle")) miss.push("髪型");
   if (!getOne("eyeShape"))  miss.push("目の形");
 
-  // 推奨（任意）
+  // 推奨（任意）— 足りてなくてもブロックしない
   if (!getOne("skinBody"))  miss.push("体型（任意）");
   if (!getOne("face"))      miss.push("顔の特徴（任意）");
   if (!getOne("artStyle"))  miss.push("画風（任意）");
 
-  // ★ 服は“必須”に変更（学習タブ）
+  // 服は必須（onepiece or 上下）
   const mode = document.querySelector('input[name="outfitMode"]:checked')?.value || "separate";
   if (mode === "onepiece") {
     if (!getOne("outfit_dress")) miss.push("ワンピース（必須）");
@@ -527,18 +523,18 @@ function listMissingForOneTest() {
     if (!bottomPicked) miss.push("ボトム（必須）");
   }
 
-  // 全角/半角どちらの「(任意)」「（任意）」も除外
+  // 「（任意）」表記のものは不足リストから除外（全角/半角対応）
   const OPTIONAL_RE = /[（(]\s*任意\s*[)）]$/;
   return miss.filter(x => !OPTIONAL_RE.test(x));
 }
 
-// ===== 1枚テスト: ボタンの有効/無効制御 =====
+// ===== 1枚テスト: ボタンの活性/非活性制御 =====
 function updateOneTestReady() {
   const btn = $("#btnOneLearn");
   if (!btn) return;
 
   const miss = listMissingForOneTest();
-  const ok = miss.length === 0;
+  const ok   = miss.length === 0;
 
   btn.disabled = !ok;
   btn.classList.toggle("disabled", !ok);
@@ -546,21 +542,13 @@ function updateOneTestReady() {
 
   const hint = document.getElementById("readyHint");
   if (hint) hint.textContent = ok ? "" : ("不足: " + miss.join(" / "));
+
+  // ほかから呼べるように（HTMLのinlineや他関数から）
+  window.updateOneTestReady = updateOneTestReady;
 }
 
 function isBasicReadyForOneTest(){ return listMissingForOneTest().length === 0; }
 
-function updateOneTestReady(){
-  const btn = $("#btnOneLearn");
-  if (!btn) return;
-  const miss = listMissingForOneTest();
-  const ok = miss.length === 0;
-  btn.disabled = !ok;
-  btn.classList.toggle("disabled", !ok);
-  btn.title = ok ? "" : ("不足: " + miss.join(" / "));
-  const hint = document.getElementById("readyHint");
-  if (hint) hint.textContent = ok ? "" : ("不足: " + miss.join(" / "));
-}
 
 function autoFillRequiredOnce(){
   // outfitMode の状態を見て最低限だけ自動選択
@@ -2484,4 +2472,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!window.__LPM_INIT_DONE__) {
     try { (0, eval)("initSafely && 0"); } catch {} // no-op: 即時IIFEが走る構造なので何もしない
   }
+});
+// 初期反映
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof updateOneTestReady === "function") updateOneTestReady();
+});
+
+// 入力が変わるたびに再評価（主要な領域だけ軽く）
+["#hairStyle","#eyeShape","#skinBody","#face","#artStyle",
+ "#outfit_top","#outfit_pants","#outfit_skirt","#outfit_dress"
+].forEach(sel => {
+  const root = document.querySelector(sel);
+  if (!root) return;
+  root.addEventListener("change", () => updateOneTestReady());
 });
