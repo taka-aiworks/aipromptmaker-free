@@ -19,6 +19,18 @@ const toast = (msg) => {
 
 /* ========= 無料版制限 ========= */
 
+/* ========= 内蔵辞書（空で開始） ========= */
+  const EMBED_NSFW = { categories:{ expression:[], exposure:[], situation:[], lighting:[] } };
+  const EMPTY_SFW = {
+    hair_style:[], eyes:[], face:[], skin_body:[], art_style:[],
+    outfit:[], accessories:[], background:[], pose_composition:[], expressions:[], lighting:[],
+    age:[], gender:[], body_type:[], height:[], personality:[], worldview:[], speech_tone:[]
+  };
+  // EMBED_SFW が無くても落ちないように
+  let SFW;
+  try { SFW = JSON.parse(JSON.stringify(EMBED_SFW)); }
+  catch { SFW = JSON.parse(JSON.stringify(EMPTY_SFW)); }
+
 let NSFW = normNSFW(EMBED_NSFW);
 
 const FREE_TIER = true;
@@ -363,17 +375,6 @@ function resetSettings() {
   $("#gasTestResult") && ($("#gasTestResult").textContent = "初期化しました");
 }
 
-/* ========= 内蔵辞書（空で開始） ========= */
-  const EMBED_NSFW = { categories:{ expression:[], exposure:[], situation:[], lighting:[] } };
-  const EMPTY_SFW = {
-    hair_style:[], eyes:[], face:[], skin_body:[], art_style:[],
-    outfit:[], accessories:[], background:[], pose_composition:[], expressions:[], lighting:[],
-    age:[], gender:[], body_type:[], height:[], personality:[], worldview:[], speech_tone:[]
-  };
-  // EMBED_SFW が無くても落ちないように
-  let SFW;
-  try { SFW = JSON.parse(JSON.stringify(EMBED_SFW)); }
-  catch { SFW = JSON.parse(JSON.stringify(EMPTY_SFW)); }
 
   if (FREE_TIER) {
     // 既存の NSFW 変数を再宣言せず、中身だけ空にする
