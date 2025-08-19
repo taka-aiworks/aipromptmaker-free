@@ -219,16 +219,12 @@
 
       <!-- 学習で使う可変要素（無料版はここで選ぶ） -->
 <div class="panel" id="basic_variants">
-  <h2 style="margin-top:18px">背景 / ポーズ / 構図 / 表情 / ライティング（学習で使用）</h2>
-  <div class="grid g2" style="margin-top:8px">
+  <h2 style="margin-top:18px">背景 / ポーズ / 構図 / 表情 / ライティング ※ 無料版ではここで選んだ候補の中から学習モードが1つずつ拾って1パターンを作成します<div class="mini" style="margin-top:6px">
     <div class="panel"><h3>背景（複数可）</h3><div id="bg" class="scroller"></div></div>
     <div class="panel"><h3>表情（複数可）</h3><div id="expr" class="scroller"></div></div>
     <div class="panel"><h3>ポーズ（複数可）</h3><div id="pose" class="scroller"></div></div>
     <div class="panel"><h3>構図（複数可）</h3><div id="comp" class="scroller"></div></div>
     <div class="panel"><h3>ライティング（複数可）</h3><div id="lightLearn" class="scroller"></div></div>
-  </div>
-  <div class="mini" style="margin-top:6px">
-    ※ 無料版ではここで選んだ候補の中から学習モードが1つずつ拾って1パターンを作成します
   </div>
 </div>
       
@@ -246,6 +242,20 @@
         <label style="margin-top:8px">LoRAタグ（任意）</label>
         <input id="loraTag" type="text" placeholder="<lora:YourLoRA:0.8>">
       </div>
+  
+      <!-- FREE EDIT: NSFW関連UIは削除 -->
+      <div class="grid g2">
+        <div class="panel">
+          <h3>固定タグ / ネガティブ</h3>
+          <label>固定タグ</label>
+          <textarea id="fixedManual" rows="3" placeholder="※テスト生成時,学習モードでは自動で solo と性別に応じた 1girl 1boyが付与されます"></textarea>
+          <label style="margin-top:10px">ネガティブ</label>
+          <textarea id="negGlobal" rows="3" placeholder="※ 指崩れ・画質劣化などを防ぐプロンプトが既定で入っています。必要に応じて追記"></textarea>
+          <div class="row mini">
+            <label><input type="checkbox" id="useDefaultNeg" checked> デフォルトのネガティブプロンプトを使う</label>
+          </div>
+        </div>
+      
       <div class="ad-container">
   <div class="ad-item">
       <a href="https://px.a8.net/svt/ejp?a8mat=45BW2N+3ORPGA+1WP2+1BNBJL" rel="nofollow">
@@ -302,65 +312,16 @@
          学習モード（FREE：1パターンのみ）
          ======================= -->
     <section id="panelLearning" class="card" hidden>
-      <div class="row" style="align-items:center">
-        <h2 style="margin:0;flex:1">学習用バリエーション（無料版）</h2>
-        <span class="badge">出力は常に1パターン</span>
-      </div>
-      <div class="note mini">
-        <b>背景 / ポーズ / 表情 / ライティング</b>から1つずつ拾って1パターンを作成します。NSFW要素は利用できません。
-      </div>
-
-      <div class="grid g2">
-<!-- ここは表示用ダミー。IDは衝突回避のため改名 -->
-<div class="panel">
-  <h3>差分（学習向け・見本）</h3>
-  <div class="row mini"><b>背景</b></div>
-  <div id="x_bg" class="scroller"></div>
-  <hr class="sep">
-  <div class="row mini"><b>ポーズ</b></div>
-  <div id="x_pose" class="scroller"></div>
-  <div class="row mini" style="margin-top:8px"><b>構図</b></div>
-  <div id="x_comp" class="scroller"></div>
-  <hr class="sep">
-  <div class="row mini"><b>表情</b></div>
-  <div id="x_expr" class="scroller"></div>
-  <hr class="sep">
-  <div class="row mini"><b>ライティング</b></div>
-  <div id="x_lightLearn" class="scroller"></div>
-</div>
-        <!-- FREE EDIT: 固定アクセは使える（恒常1種） -->
-        <div class="panel">
-          <div class="mini"><b>固定アクセ（任意・1種）</b></div>
-          <select id="learn_acc"></select>
-          <div class="wheel-box" style="margin-top:6px">
-            <div id="wheel_learnAcc" class="wheel"></div><div id="thumb_learnAcc" class="thumb"></div>
-          </div>
-          <div class="row mini">S:<input id="sat_learnAcc" type="range" min="0" max="100" value="75">
-            L:<input id="lit_learnAcc" type="range" min="0" max="100" value="50"></div>
-          <div class="row mini"><div id="sw_learnAcc" class="swatch"></div>
-            <span>色タグ: <code class="tag" id="tag_learnAcc">black</code></span></div>
-          <div class="mini">※ 未選択なら挿入しません</div>
-        </div>
-      </div>
-
-      <!-- FREE EDIT: NSFW関連UIは削除 -->
-
-      <div class="grid g2">
-        <div class="panel">
-          <h3>固定タグ / ネガティブ</h3>
-          <label>固定タグ（全行に付与）</label>
-          <textarea id="fixedManual" rows="3" placeholder="※テスト生成時,学習モードでは自動で solo と性別に応じた 1girl 1boyが付与されます"></textarea>
-          <label style="margin-top:10px">ネガティブ（全行）</label>
-          <textarea id="negGlobal" rows="3" placeholder="※ 指崩れ・画質劣化などを防ぐプロンプトが既定で入っています。必要に応じて追記"></textarea>
-          <div class="row mini">
-            <label><input type="checkbox" id="useDefaultNeg" checked> デフォルトのネガティブプロンプトを使う</label>
-          </div>
-        </div>
-
-        <!-- FREE EDIT: バッチ生成UIを非表示（1枚テストは基本タブで対応） -->
-        <div class="panel" style="display:none"></div>
-      </div>
-    </section>
+      <div class="panel is-disabled" style="text-align:center; padding:28px">
+  <h3 style="margin:0 0 6px">🚫 無料版ではご利用いただけません</h3>
+  <p class="mini" style="margin:6px 0 12px">
+    固定タグやネガティブプロンプトの手動入力は<br>
+    <b>有料版</b> で解放されます。
+  </p>
+  <a class="btn ok" href="#" onclick="alert('有料版の販売ページは準備中です');return false;">
+    有料版のご案内
+  </a>
+</div>    </section>
 
     <!-- =======================
          量産モード（FREE：ロック）
