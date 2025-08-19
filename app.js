@@ -182,6 +182,26 @@ function stripMultiHints(parts){
   return parts.filter(t => !MULTI_HINT_RE.test(String(t)));
 }
 
+// === ポーズ/構図のゆる分類 ===
+function categorizePoseComp(list){
+  const L = normList(list||[]);
+  const isComp = (t)=>/\b(
+    front view|side view|back view|profile|three-quarters? view|
+    looking up|looking down|from below|overhead view|
+    close-?up|bust shot|waist up|upper body|full body|wide shot|
+    centered composition|rule of thirds
+  )\b/i.test(t);
+  const poseTags = [];
+  const compTags = [];
+  for (const it of L){
+    const tag = it.tag || "";
+    if (isComp(tag)) compTags.push(it); else poseTags.push(it);
+  }
+  return { poseTags, compTags };
+}
+
+
+
 /* === 学習ガード：過剰要素の除去＆上限 === */
 // 変化が大きく学習をブレさせやすい語を落とす（学習時のみ）
 const LEARN_EXCLUDE_RE = /\b(?:fisheye|wide[-\s]?angle|ultra[-\s]?wide|dutch\s?angle|extreme\s?(?:close[-\s]?up|zoom|perspective)|motion\s?blur|long\s?exposure|bokeh\s?balls|tilt[-\s]?shift|depth\s?of\s?field|hdr|high\s?contrast|dynamic\s?lighting|dramatic\s?lighting|backlight(?:ing)?|rim\s?light(?:ing)?|fireworks|sparks|confetti|holding\s+\w+|wielding\s+\w+|carrying\s+\w+|using\s+\w+|smartphone|cell\s?phone|microphone|camera|sign|banner|weapon)\b/i;
@@ -1143,30 +1163,45 @@ function renderSFW(){
   radioList($("#skinBody"),    SFW.skin_body,       "skinBody");
   radioList($("#artStyle"),    SFW.art_style,       "artStyle");
   checkList($("#bg"),          SFW.background,      "bg");
-  checkList($("#pose"),        SFW.pose_composition,"pose");
   checkList($("#expr"),        SFW.expressions,     "expr");
   checkList($("#p_bg"),        SFW.background,      "p_bg");
-  checkList($("#p_pose"),      SFW.pose_composition,"p_pose");
   checkList($("#p_expr"),      SFW.expressions,     "p_expr");
   checkList($("#p_light"),     SFW.lighting,        "p_light");
   checkList($("#lightLearn"),  SFW.lighting,        "lightLearn");
 
+  // --- ポーズ/構図（HTMLに #comp / #p_comp があれば自動分割、無ければ従来どおり1カラム）
+  {
+    const src = SFW.pose_composition || [];
+    const { poseTags, compTags } = categorizePoseComp(src);
+
+    // 学習タブ
+    if (document.getElementById("comp")) {
+      checkList($("#pose"), poseTags, "pose");
+      checkList($("#comp"), compTags, "comp");
+    } else {
+      checkList($("#pose"), src, "pose");
+    }
+
+    // 量産タブ
+    if (document.getElementById("p_comp")) {
+      checkList($("#p_pose"), poseTags, "p_pose");
+      checkList($("#p_comp"), compTags, "p_comp");
+    } else {
+      checkList($("#p_pose"), src, "p_pose");
+    }
+  }
+
   // ★ outfit をカテゴリに分配して描画
-const C = categorizeOutfit(SFW.outfit);
-
-// ← ここだけ checkFirst:false に
-radioList($("#outfit_top"),    C.top,   "outfit_top",   {checkFirst:false});
-radioList($("#outfit_pants"),  C.pants, "outfit_pants", {checkFirst:false});
-radioList($("#outfit_skirt"),  C.skirt, "outfit_skirt", {checkFirst:false});
-radioList($("#outfit_dress"),  C.dress, "outfit_dress", {checkFirst:false});
-
-checkList($("#p_outfit_shoes"), C.shoes, "p_outfit_shoes");
-
-// 量産側（こちらは従来どおりチェックボックス）
-checkList($("#p_outfit_top"),   C.top,   "p_outfit_top");
-checkList($("#p_outfit_pants"), C.pants, "p_outfit_pants");
-checkList($("#p_outfit_skirt"), C.skirt, "p_outfit_skirt");
-checkList($("#p_outfit_dress"), C.dress, "p_outfit_dress");
+  const C = categorizeOutfit(SFW.outfit);
+  radioList($("#outfit_top"),    C.top,   "outfit_top",   {checkFirst:false});
+  radioList($("#outfit_pants"),  C.pants, "outfit_pants", {checkFirst:false});
+  radioList($("#outfit_skirt"),  C.skirt, "outfit_skirt", {checkFirst:false});
+  radioList($("#outfit_dress"),  C.dress, "outfit_dress", {checkFirst:false});
+  checkList($("#p_outfit_shoes"), C.shoes, "p_outfit_shoes");
+  checkList($("#p_outfit_top"),   C.top,   "p_outfit_top");
+  checkList($("#p_outfit_pants"), C.pants, "p_outfit_pants");
+  checkList($("#p_outfit_skirt"), C.skirt, "p_outfit_skirt");
+  checkList($("#p_outfit_dress"), C.dress, "p_outfit_dress");
 
   // ★ 基本情報（ID / name をHTMLに合わせて）
   radioList($("#bf_age"),      SFW.age,          "bf_age");
@@ -1177,9 +1212,8 @@ checkList($("#p_outfit_dress"), C.dress, "p_outfit_dress");
   radioList($("#bf_world"),    SFW.worldview,    "bf_world");
   radioList($("#bf_tone"),     SFW.speech_tone,  "bf_tone");
 
-   // ★ ここを追加：動的生成後に有効/無効を更新
+  // 動的生成後の必須チェック
   if (typeof updateOneTestReady === "function") updateOneTestReady();
-
 }
 
 function bindBottomCategoryGuess(){
@@ -1709,55 +1743,57 @@ function assembleFixedLearning(){
   return uniq(out).filter(Boolean);
 }
 
-// 追加: 服色と服名をペア化
+// 置き換え：服色と服名をペア化（top/bottom/shoes を実服名へマージ）
 function pairWearColors(parts){
-  const P = new Set(parts.filter(Boolean));
-  const take = (re)=> [...P].find(t=> re.test(String(t)));
+  const P = new Set((parts || []).filter(Boolean));
+  const S = s => String(s || "");
 
-  // 服名検出用
-  const topRe     = /\b(t-?shirt|shirt|blouse|hoodie|sweater|cardigan|jacket|coat|trench coat|tank top|camisole|turtleneck|off-shoulder top|crop top|sweatshirt)\b/i;
-  const bottomRe  = /\b(skirt|pleated skirt|long skirt|hakama|shorts|pants|jeans|trousers|leggings|overalls|bermuda shorts)\b/i;
-  const dressRe = /\b(dress|one[-\s]?piece|sundress|gown|kimono(?:\s+dress)?|yukata|cheongsam|qipao|lolita\s+dress|(?:school|sailor|blazer|nurse|maid|waitress)\s+uniform|maid\s+outfit|tracksuit|sportswear|jersey|robe|poncho|cape)\b/i;
-  const shoesRe = /\b(shoes|boots|heels|sandals|sneakers|loafers|mary janes|geta|zori|thigh-high socks|knee-high socks|socks)\b/i;
+  // 実服名の検出
+  const TOP_RE = /\b(t-?shirt|shirt|blouse|hoodie|sweater|cardigan|jacket|coat|trench\ coat|tank\ top|camisole|turtleneck|off-shoulder\ top|crop\ top|sweatshirt|blazer)\b/i;
+  const BOTTOM_RE = /\b(skirt|pleated\ skirt|long\ skirt|hakama|shorts|pants|jeans|trousers|leggings|overalls|bermuda\ shorts)\b/i;
+  const DRESS_RE = /\b(dress|one[-\s]?piece|sundress|gown|kimono(?:\s+dress)?|yukata|cheongsam|qipao|lolita\s+dress|(?:school|sailor|blazer|nurse|maid|waitress)\s+uniform|maid\s+outfit|tracksuit|sportswear|jersey|robe|poncho|cape)\b/i;
+  const SHOES_RE = /\b(shoes|boots|heels|sandals|sneakers|loafers|mary\ janes|geta|zori)\b/i;
 
-  // マッチした文字列から「素の名詞」を抜き出す（色や形容は捨てる）
-  const nounWord = (s, re) => {
-    const m = String(s||"").match(re);
-    return m ? m[1].toLowerCase() : ""; // 例: "gray shoes" -> "shoes"
-  };
+  const find = re => [...P].find(t => re.test(S(t)));
+  const noun = (hit, re) => { const m = S(hit).match(re); return m ? m[1].toLowerCase() : ""; };
 
-  const topHit    = take(topRe);
-  const bottomHit = take(bottomRe);
-  const dressHit  = take(dressRe);
-  const shoesHit  = take(shoesRe);
+  const topHit    = find(TOP_RE);
+  const bottomHit = find(BOTTOM_RE);
+  const dressHit  = find(DRESS_RE);
+  const shoesHit  = find(SHOES_RE);
 
-  const topWord    = nounWord(topHit, topRe);
-  const bottomWord = nounWord(bottomHit, bottomRe);
-  const dressWord  = nounWord(dressHit, dressRe);
-  const shoesWord  = nounWord(shoesHit, shoesRe);
+  const topWord    = noun(topHit, TOP_RE);
+  const bottomWord = noun(bottomHit, BOTTOM_RE);
+  const dressWord  = noun(dressHit, DRESS_RE);
+  const shoesWord  = noun(shoesHit, SHOES_RE);
 
-  const replacePair = (nounWord) => {
+  // "xxx top" / "yyy bottom" / "zzz shoes" → 実服名へ合体
+  const replaceGeneric = (generic, nounWord) => {
     if (!nounWord) return;
-    const reColorTag = new RegExp(`^(.+?)\\s+(?:${nounWord})$`, "i"); // ex) "orange top"
-    const colorTag = [...P].find(t => reColorTag.test(String(t)));
-    if (colorTag) {
-      // 色タグ（"orange top" 等）と、服名（"t-shirt" 等/ "top" / "shoes" など）を除去
-      P.delete(colorTag);
-      // noun は「色付き名詞」かもしれないので、候補を全部消しておく
-      [...P].forEach(x => { if (new RegExp(`\\b${nounWord}\\b`, "i").test(String(x))) P.delete(x); });
+    const reColor = new RegExp(`^(.+?)\\s+${generic}$`, "i");   // 例: "orange top"
+    const colorHit = [...P].find(t => reColor.test(S(t)));
+    if (!colorHit) return;
 
-      const color = String(colorTag).replace(reColorTag, "$1"); // "orange"
-      P.add(`${color} ${nounWord}`); // "orange t-shirt" / "orange bottom" / "gray shoes"
-    }
+    // 色だけ抽出
+    const color = S(colorHit).replace(reColor, "$1");
+
+    // 元の色タグとプレースホルダ、そして“素の名詞”を消す
+    P.delete(colorHit);
+    [...P].forEach(x => {
+      if (new RegExp(`\\b${generic}\\b`, "i").test(S(x))) P.delete(x);
+      if (new RegExp(`\\b${nounWord}\\b`, "i").test(S(x))) P.delete(x);
+    });
+
+    // 合体して追加（例: "orange t-shirt" / "sky blue skirt" / "gray sneakers"）
+    P.add(`${color} ${nounWord}`);
   };
 
-  if (dressWord) {
-    replacePair(dressWord);
-  } else {
-    replacePair(topWord);
-    replacePair(bottomWord);
+  // ワンピ系は元から「色 + dress名」で入るので、top/bottomの置換はスキップ
+  if (!dressWord) {
+    replaceGeneric("top", topWord);
+    replaceGeneric("bottom", bottomWord);
   }
-  replacePair(shoesWord);
+  replaceGeneric("shoes", shoesWord);
 
   return [...P];
 }
