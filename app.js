@@ -1817,7 +1817,10 @@ function getSelectedNSFW_Learn(){
 function buildOneLearning(extraSeed = 0){
   // ===== 1) ベース構築 =====
   const fixed = assembleFixedLearning();
-  const BG = getMany("bg"), PO = getMany("pose"), EX = getMany("expr"), LI = getMany("lightLearn");
+  const BG = getMany("bg");
+  const PO = [...getMany("pose"), ...getMany("comp")];           // ← compも足す（無ければ空配列）
+  const EX = getMany("expr");
+  const LI = getMany("lightLearn");
   const addon = getSelectedNSFW_Learn();
   const b = pick(BG), p = pick(PO), e = pick(EX), l = LI.length ? pick(LI) : "";
 
@@ -2098,7 +2101,7 @@ function buildBatchProduction(n){
   const O = readProductionOutfits();  // {top, pants, skirt, dress, shoes}
 
   const bgs    = getMany("p_bg");
-  const poses  = getMany("p_pose");
+  const poses  = [...getMany("p_pose"), ...getMany("p_comp")];   // ← p_comp も吸収
   const exprs  = getMany("p_expr");
   const lights = getMany("p_light");
   const acc    = readAccessorySlots();
