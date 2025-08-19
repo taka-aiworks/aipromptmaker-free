@@ -810,20 +810,21 @@ const syncBottomForOutfit = ()=>{
   const mode = document.querySelector('input[name="outfitMode"]:checked')?.value || "separate";
 
   const fsDress = document.getElementById('fsDress');
-  const topPanel    = document.getElementById('outfit_top')?.closest('.panel');
-  const bottomPanel = document.getElementById('bottomCategoryRadios')?.closest('.panel');
+  const fsTop   = document.getElementById('fsTop');             // ← トップ用 fieldset を用意（HTML側で付与）
+  const fsPants = document.getElementById('fsBottom_pants');
+  const fsSkirt = document.getElementById('fsBottom_skirt');
+  const panelTop    = document.getElementById('outfit_top')?.closest('.panel');
+  const panelBottom = document.getElementById('bottomCategoryRadios')?.closest('.panel');
 
-  // 入力を一括で止める/戻すヘルパ（※ 使うのは onepiece の時だけ）
-  const setInputsDisabled = (root, on) => {
-    if (!root) return;
-    root.querySelectorAll('input, select, button').forEach(el => { el.disabled = !!on; });
-    root.classList.toggle('is-disabled', !!on);
-  };
+
 
   if (mode === "onepiece") {
     if (fsDress) fsDress.disabled = false;   // ワンピ選択可
-    setInputsDisabled(topPanel,    true);    // 上下は触れない
-    setInputsDisabled(bottomPanel, true);    // 下カテゴリも触れない
+    if (fsTop)   fsTop.disabled   = true;
+    if (fsPants) fsPants.disabled = true;
+    if (fsSkirt) fsSkirt.disabled = true;
+    panelTop?.classList.add('is-disabled');
+    panelBottom?.classList.add('is-disabled');
 
     // 下カラーを自動OFF
     const cb = document.getElementById("useBottomColor");
@@ -833,8 +834,12 @@ const syncBottomForOutfit = ()=>{
     // separate：
     if (fsDress) fsDress.disabled = true;    // ワンピを無効化
     // 見た目だけ有効化（内部の input は触らない：fieldset の有効/無効は swap に任せる）
-    topPanel?.classList.remove('is-disabled');
-    bottomPanel?.classList.remove('is-disabled');
+    panelTop?.classList.remove('is-disabled');
+    panelBottom?.classList.remove('is-disabled');
+    if (fsTop)   fsTop.disabled   = false;
+    if (fsPants) fsPants.disabled = false;
+    if (fsSkirt) fsSkirt.disabled = false;
+
 
     // カテゴリラジオは必ず押せるように
     const rP = document.getElementById('bottomCat_pants');
