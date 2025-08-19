@@ -182,15 +182,10 @@ function stripMultiHints(parts){
   return parts.filter(t => !MULTI_HINT_RE.test(String(t)));
 }
 
-// === ポーズ/構図のゆる分類 ===
+// === ポーズ/構図のゆる判定（片方のボックスが無いときは無視していい） ===
 function categorizePoseComp(list){
   const L = normList(list||[]);
-  const isComp = (t)=>/\b(
-    front view|side view|back view|profile|three-quarters? view|
-    looking up|looking down|from below|overhead view|
-    close-?up|bust shot|waist up|upper body|full body|wide shot|
-    centered composition|rule of thirds
-  )\b/i.test(t);
+  const isComp = (t)=>/\b(front view|side view|back view|looking up|looking down|overhead view|from below|profile|three-quarters view|bust shot|waist up|upper body|full body|close-?up|wide shot|centered composition|rule of thirds)\b/i.test(t);
   const poseTags = [];
   const compTags = [];
   for (const it of L){
@@ -199,8 +194,6 @@ function categorizePoseComp(list){
   }
   return { poseTags, compTags };
 }
-
-
 
 /* === 学習ガード：過剰要素の除去＆上限 === */
 // 変化が大きく学習をブレさせやすい語を落とす（学習時のみ）
