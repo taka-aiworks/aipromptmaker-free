@@ -52,7 +52,7 @@ a { color: var(--brand); text-decoration: none; }
   .span-2 { grid-column: span 2; }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1024px) {
   .g3, .g2 { grid-template-columns: 1fr; }
   .g4 { grid-template-columns: repeat(2, 1fr); }
 }
@@ -199,6 +199,9 @@ select {
   border-radius: 10px;
   padding: 12px;
   min-height: 140px;
+  max-height: 140px;   /* 好きな高さに調整可 */
+  overflow-y: auto;
+  white-space: pre-wrap;   /* 折り返し維持 */
 }
 
 /* テーブル */
@@ -357,14 +360,16 @@ details[open] summary .caret { transform: rotate(90deg); }
 
 /* 無効状態の見た目（下カテゴリのfieldsetや親パネルに付く想定） */
 .is-disabled {
-  opacity: .45;
-  pointer-events: none;   /* 操作も止める */
-}
+   opacity: .45;           /* 見た目だけ落とす。pointer-eventsは殺さない */
+ }
+
 
 /* パネルは見た目を落とす＋操作制御（チェックボックスだけは押せる） */
 .panel.is-disabled {
   opacity: .5;
 }
+
+/* 修正前の問題のあるCSS */
 .panel.is-disabled .wheel-box,
 .panel.is-disabled input[type="range"],
 .panel.is-disabled select,
@@ -372,16 +377,30 @@ details[open] summary .caret { transform: rotate(90deg); }
   pointer-events: none;
   filter: grayscale(80%);
 }
-.panel.is-disabled input[type="checkbox"] {
-  pointer-events: auto;   /* ← チェックは常に戻せる */
+
+/* ★★★ 修正：radio も除外対象に追加 ★★★ */
+.panel.is-disabled .wheel-box,
+.panel.is-disabled input[type="range"],
+.panel.is-disabled select,
+.panel.is-disabled input[type="text"] {
+  pointer-events: none;
+  filter: grayscale(80%);
 }
+
+/* 重要：ラジオボタンとチェックボックスは常に操作可能にする */
+.panel.is-disabled input[type="checkbox"],
+.panel.is-disabled input[type="radio"],
+.panel.is-disabled label {
+  pointer-events: auto !important;
+}
+
 
 /* 機能としての無効化は fieldset[disabled] を使うが、見た目は変えない */
 fieldset { border: 0; margin: 0; padding: 0; }
-fieldset:disabled {
-  pointer-events: none;   /* 入力は止める */
-  opacity: inherit;             /* ← ここがキモ：見た目は .is-disabled に任せる */
-}
+/*fieldset:disabled {
+  pointer-events: none;   
+  opacity: inherit;             
+} */
 
 /* Safari 対策 */
 fieldset, fieldset:disabled {
@@ -552,7 +571,19 @@ legend { display: none; }
 
 /* fieldsetは機能的に無効化するが、見た目は変えない */
 fieldset { border: 0; margin: 0; padding: 0; }
-fieldset:disabled { pointer-events: none; opacity: 1; }
+
+fieldset:disabled { 
+  pointer-events: none; 
+  opacity: 1; 
+}
+
+/* ★★★ 追加：fieldset内のラジオボタンは常に操作可能 ★★★ */
+fieldset:disabled input[type="radio"],
+fieldset:disabled input[type="checkbox"],
+fieldset:disabled label {
+  pointer-events: auto !important;
+}
+
 legend { display: none; }
 
 /* 服カラー（固定・量産）どちらも同じ大きさに統一して枠内に収める */
@@ -691,52 +722,231 @@ legend { display: none; }
   .mini { transform: translateY(-0.02em); } /* ほんの少しだけ下ろす */
 }
 
-
-/* ヘッダーをグリッド1fr|autoで一本化 */
-.header .inner{
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  column-gap: 12px;
+/* 学習セット生成カードまわりの被り対策 */
+#learnBatchCard{
+  clear: both;          /* 前のfloatを無視して独立行にする */
+  margin-top: 16px;     /* 前ブロックと離す */
 }
 
-/* 左カラム：タブ＆状態 */
-.header .inner > .tabbar { grid-column: 1; }
-.header .inner > .row.mini:first-of-type { grid-column: 1; }
-
-/* 右カラム：プロ版ボタンの行 */
-.header .inner > .row.mini:last-of-type{
-  grid-column: 2;
-  justify-self: end;     /* ← 右端にピタッ */
-}
-
-/* ボタン自体は通常フローでOK（absolute禁止） */
-.pro-btn{ position: static; white-space: nowrap; }
-
-
-
-.ad-container {
+#learnBatchCard .row{
   display: flex;
-  justify-content: center;  /* 真ん中寄せ */
-  gap: 12px;                /* 広告の間隔 */
-  flex-wrap: wrap;          /* 狭い時は折り返し */
-}
-
-.ad-item {
-  flex: 0 0 auto;           
-  display: flex;            /* 子の中身を中央寄せ */
-  justify-content: center;
+  flex-wrap: wrap;      /* 横が溢れたら折り返す＝高さが潰れない */
+  gap: 8px;
   align-items: center;
-  background: #fff;         /* なくてもOK、デバッグ用 */
-  border: 1px solid transparent; /* 枠を揃える補助 */
-  width: 300px;             /* 全部300幅に固定 */
-  height: 250px;            /* 高さも固定で揃える */
 }
 
-.ad-item ins,
-.ad-item iframe,
-.ad-item img {
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
+/* テーブルやテキストがはみ出して次要素に重ならないように */
+#tblLearn{
+  width: 100%;
+  table-layout: fixed;
+}
+#tblLearn th, #tblLearn td{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#outLearn{
+  max-height: 420px;    /* 任意：スクロールにして高さ固定 */
+  overflow: auto;
+}
+
+/* パネル/グリッドの下に一定の余白を持たせる（全体の保険） */
+.card > .panel,
+.card > .grid { margin-bottom: 16px; }
+
+/* 親パネルがfloat子を内包できていない場合の保険 */
+.panel::after { content:""; display:block; clear:both; }
+
+/* ========= Word Mode (単語モード) ========= */
+#panelWordMode { padding: 16px 18px; color: var(--ink); }
+
+.wm-header h2 { margin: 0 0 6px; font-size: 1.15rem; color: var(--ink); }
+.wm-note { margin: 0 0 16px; opacity: .8; color: var(--ink); }
+
+.wm-selected {
+  margin: 12px 0 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px; padding: 10px;
+  background: rgba(255,255,255,.03);
+  color: var(--ink);
+}
+.wm-selected-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.wm-selected-actions button { font-size:.85rem; padding:6px 10px; }
+.wm-chip-area { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.wm-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 8px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06);
+  font-size:.9rem; color: var(--ink);
+}
+.wm-chip small { opacity:.8; color: var(--muted); }
+.wm-chip .x { margin-left:2px; cursor:pointer; opacity:.8; color: var(--ink); }
+
+.wm-accordion { margin: 18px 0; }
+.wm-acc-title { margin: 10px 0 6px; font-size: 1rem; opacity:.9; color: var(--ink); }
+
+.wm-acc { border:1px solid rgba(255,255,255,.12); border-radius:8px; margin:8px 0; overflow:hidden; }
+.wm-acc > summary {
+  list-style:none; cursor:pointer; padding:10px 12px;
+  background:rgba(255,255,255,.04); display:flex; align-items:center; justify-content:space-between;
+  color: var(--ink);
+}
+.wm-acc[open] > summary { background:rgba(255,255,255,.07); }
+.wm-acc summary::-webkit-details-marker { display:none; }
+.wm-acc .wm-count { font-size:.85rem; opacity:.8; color: var(--muted); }
+.wm-items {
+  padding:12px; display:grid; gap:10px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  color: var(--ink);
+}
+.wm-tip { margin: 6px 12px 12px; opacity:.75; font-size:.9rem; color: var(--muted); }
+
+.wm-item {
+  width:100%; text-align:left; padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03);
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  color: var(--ink);
+}
+.wm-item:hover { background:rgba(255,255,255,.06); }
+.wm-item .wm-jp { font-size: .98rem; line-height:1.2; color: var(--ink); }
+.wm-item .wm-en { font-size: .78rem; opacity:.85; display:block; color: var(--muted); }
+.wm-actions { display:flex; align-items:center; gap:6px; margin-left:auto; }
+.wm-actions button { font-size:.78rem; padding:4px 8px; border-radius:8px; }
+
+.wm-item-color .wm-actions .wm-copy-both { display:none; }
+
+.wm-table-wrap { margin-top:18px; }
+.wm-table-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.wm-table-actions button { padding:6px 10px; font-size:.9rem; }
+.wm-table {
+  width:100%; border-collapse: collapse; overflow:hidden;
+  border:1px solid rgba(255,255,255,.12); border-radius:10px;
+  color: var(--ink);
+}
+.wm-table th, .wm-table td {
+  padding:10px; border-bottom:1px solid rgba(255,255,255,.08);
+  color: var(--ink);
+}
+.wm-table thead th { background:rgba(255,255,255,.06); font-weight:600; color: var(--ink); }
+.wm-row-actions { display:flex; gap:6px; }
+.wm-row-actions button { padding:4px 8px; font-size:.82rem; }
+.wm-table tr:last-child td { border-bottom:none; }
+
+/* 小さめ端末 */
+@media (max-width: 720px){
+  .wm-items { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .wm-table th:nth-child(1), .wm-table td:nth-child(1) { width:45%; }
+  .wm-table th:nth-child(2), .wm-table td:nth-child(2) { width:35%; }
+}
+
+
+/* === 服（固定）リストを少し低く固定 === */
+:root{
+  /* 好みでここだけ変えれば全体が連動 */
+  --outfit-scroll-h: 200px; /* 例: 180～220pxあたりが見やすい */
+}
+
+/* 基本情報タブの服エリアだけを対象に（他モードは触らない） */
+#panelBasic #panel_outfitFixed .scroller{
+  max-height: var(--outfit-scroll-h);
+  overflow: auto;
+}
+
+/* 余白を少しだけ締める（任意） */
+#panelBasic #panel_outfitFixed .panel h4{
+  margin-bottom: 4px;
+}
+#panelBasic #panel_outfitFixed .scroller{
+  padding-right: 4px; /* スクロールバー分の見切れ軽減 */
+}
+
+/* iPad/横幅狭い時はさらに低め（任意） */
+@media (max-width: 1024px){
+  :root{ --outfit-scroll-h: 180px; }
+}
+
+
+
+/* ====== ワンピース選択問題の根本修正 ====== */
+/* どんな状況でもラジオボタンとラベルは操作可能にする */
+input[type="radio"],
+input[type="checkbox"],
+label.chip {
+  pointer-events: auto !important;
+}
+
+/* 無効化されたパネル内でも服の選択は可能にする */
+.panel.is-disabled input[type="radio"],
+.panel.is-disabled input[type="checkbox"],
+.panel.is-disabled label.chip,
+fieldset:disabled input[type="radio"],
+fieldset:disabled input[type="checkbox"],
+fieldset:disabled label.chip {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+/* 無効化の見た目は色だけで表現 */
+.panel.is-disabled {
+  opacity: 0.6;
+}
+.panel.is-disabled .wheel-box,
+.panel.is-disabled input[type="range"],
+.panel.is-disabled select,
+.panel.is-disabled input[type="text"] {
+  pointer-events: none;
+  filter: grayscale(80%);
+}
+
+/* ラジオの色を常に青で */
+#panel_outfitFixed input[type="radio"] { accent-color: var(--brand); }
+/* 全フォームのラジオ・チェックをブランド色に統一 */
+input[type="radio"],
+input[type="checkbox"]{
+  accent-color: var(--brand);
+}
+
+/* ====== ワンピース・モード切替ラジオボタンの色を統一 ====== */
+/* すべてのラジオボタンとチェックボックスをブランド色に統一（詳細度を上げる） */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--brand) !important;
+}
+
+/* 特に基本情報タブ内のラジオボタン全体 */
+#panelBasic input[type="radio"],
+#panelBasic input[type="checkbox"] {
+  accent-color: var(--brand) !important;
+}
+
+/* outfitMode（ワンピース/セパレート）のラジオボタン */
+#panel_outfitFixed input[name="outfitMode"] {
+  accent-color: var(--brand) !important;
+}
+
+/* 無効状態でも色は青のまま維持 */
+.panel.is-disabled input[type="radio"],
+.panel.is-disabled input[type="checkbox"],
+fieldset:disabled input[type="radio"],
+fieldset:disabled input[type="checkbox"] {
+  accent-color: var(--brand) !important;
+  opacity: 1 !important;
+}
+
+/* 基本情報の4列グリッドの調整 */
+#learnTestCard .grid.g4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1200px) {
+  #learnTestCard .grid.g4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  #learnTestCard .grid.g4 {
+    grid-template-columns: 1fr;
+  }
 }
