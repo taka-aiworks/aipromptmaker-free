@@ -137,23 +137,52 @@ function dedupeByTag(list) {
 }
 
 function mergeIntoSFW(json) {
+  console.log("mergeIntoSFW開始:", json);
+  
   const src = json?.SFW || json || {};
   const next = { ...SFW };
+  
+  // 外部辞書の実際の構造を確認
+  console.log("外部辞書の構造:", Object.keys(src));
+  
   const KEYMAP = {
     "髪型": "hair_style", "目の形": "eyes", "服": "outfit", "顔の特徴": "face",
     "体型": "skin_body", "視点": "view", "画風": "art_style", "背景": "background",
     "ポーズ": "pose", "構図": "composition", "表情": "expressions",
     "アクセサリー": "accessories", "ライティング": "lighting", "年齢": "age",
     "性別": "gender", "体型(基本)": "body_type", "身長": "height", "性格": "personality",
-    "色": "colors"
+    "色": "colors",
+    
+    // 英語キーも追加
+    "hair_style": "hair_style", "eyes": "eyes", "outfit": "outfit", "face": "face",
+    "skin_body": "skin_body", "view": "view", "art_style": "art_style", 
+    "background": "background", "pose": "pose", "composition": "composition", 
+    "expressions": "expressions", "accessories": "accessories", "lighting": "lighting", 
+    "age": "age", "gender": "gender", "body_type": "body_type", "height": "height", 
+    "personality": "personality", "colors": "colors"
   };
 
   for (const [k, v] of Object.entries(src || {})) {
     const key = KEYMAP[k] || k;
-    if (next[key] === undefined) continue;
-    next[key] = dedupeByTag([...(next[key] || []), ...normList(v)]);
+    console.log(`マッピング: ${k} -> ${key} (${Array.isArray(v) ? v.length : 0}個)`);
+    
+    if (next[key] !== undefined) {
+      next[key] = dedupeByTag([...(next[key] || []), ...normList(v)]);
+    } else {
+      console.warn(`未知のキー: ${k} -> ${key}`);
+    }
   }
+  
+  // 特に重要なカテゴリの内容を詳細確認
+  if (next.outfit && next.outfit.length > 0) {
+    console.log("outfit最初の3項目:");
+    for (let i = 0; i < Math.min(3, next.outfit.length); i++) {
+      console.log(`  [${i}]:`, next.outfit[i]);
+    }
+  }
+  
   SFW = next;
+  console.log("mergeIntoSFW完了:", SFW);
 }
 
 function normNSFW(ns) {
@@ -332,17 +361,20 @@ async function loadDefaultDicts() {
     }
   };
 
+  // 外部辞書を試行
   const sfw = await tryFetch("dict/default_sfw.json");
   if (sfw) { 
+    console.log("外部SFW辞書読み込み成功:", sfw);
     mergeIntoSFW(sfw); 
     renderSFW(); 
     renderShooting();
     toast("SFW辞書を読み込みました"); 
-  } else {
-    // フォールバック：最小限の辞書データ
-    console.warn("SFW辞書の読み込みに失敗しました。フォールバック辞書を使用します。");
-    loadFallbackDict();
+    return; // 外部辞書が成功したらフォールバックは実行しない
   }
+
+  // フォールバック辞書
+  console.warn("外部辞書読み込み失敗。フォールバック辞書を使用。");
+  loadFallbackDict();
 
   const nsfw = await tryFetch("dict/default_nsfw.json");
   if (nsfw) { 
