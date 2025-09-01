@@ -233,12 +233,36 @@ function loadFallbackDict() {
       { tag: "gray eyes", label: "灰色の瞳", level: "L1" }
     ],
     outfit: [
+      // トップス
       { tag: "t-shirt", label: "Tシャツ", cat: "top", level: "L1" },
       { tag: "blouse", label: "ブラウス", cat: "top", level: "L1" },
+      { tag: "sweater", label: "セーター", cat: "top", level: "L1" },
+      { tag: "hoodie", label: "フーディー", cat: "top", level: "L1" },
+      { tag: "tank top", label: "タンクトップ", cat: "top", level: "L1" },
+      
+      // ドレス・ワンピース
       { tag: "dress", label: "ドレス", cat: "dress", level: "L1" },
+      { tag: "sundress", label: "サンドレス", cat: "dress", level: "L1" },
+      { tag: "cocktail dress", label: "カクテルドレス", cat: "dress", level: "L1" },
+      
+      // ボトムス（パンツ）
       { tag: "jeans", label: "ジーンズ", cat: "pants", level: "L1" },
+      { tag: "shorts", label: "ショーツ", cat: "pants", level: "L1" },
+      { tag: "leggings", label: "レギンス", cat: "pants", level: "L1" },
+      { tag: "trousers", label: "トラウザー", cat: "pants", level: "L1" },
+      
+      // スカート
       { tag: "skirt", label: "スカート", cat: "skirt", level: "L1" },
-      { tag: "sneakers", label: "スニーカー", cat: "shoes", level: "L1" }
+      { tag: "mini skirt", label: "ミニスカート", cat: "skirt", level: "L1" },
+      { tag: "long skirt", label: "ロングスカート", cat: "skirt", level: "L1" },
+      { tag: "pleated skirt", label: "プリーツスカート", cat: "skirt", level: "L1" },
+      
+      // 靴
+      { tag: "sneakers", label: "スニーカー", cat: "shoes", level: "L1" },
+      { tag: "high heels", label: "ハイヒール", cat: "shoes", level: "L1" },
+      { tag: "boots", label: "ブーツ", cat: "shoes", level: "L1" },
+      { tag: "sandals", label: "サンダル", cat: "shoes", level: "L1" },
+      { tag: "flats", label: "フラットシューズ", cat: "shoes", level: "L1" }
     ],
     age: [
       { tag: "young", label: "若い", level: "L1" },
