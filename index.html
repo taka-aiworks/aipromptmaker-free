@@ -628,30 +628,27 @@
     (() => {
       const scope = document.getElementById('panelBasic');
       if (!scope) return;
-
-      // 削除：これがJavaScriptファイルの $ と重複していた
-      const $ = (sel) => scope.querySelector(sel);
-      const $$ = (sel) => scope.querySelectorAll(sel);
-
-      
+    
+      // グローバルの $ / $$ を壊さないために別名を使用
+      const qs  = (sel) => scope.querySelector(sel);
+      const qsa = (sel) => Array.from(scope.querySelectorAll(sel)); // ←必ず配列化
+    
       const getIsOnepiece = () => {
-        const r = scope.querySelector('input[name="outfitMode"]:checked');
+        const r = qs('input[name="outfitMode"]:checked');
         return r?.value === 'onepiece';
       };
-
+    
       const setDisabledDeep = (root, on) => {
         if (!root) return;
         root.classList.toggle('is-disabled', !!on);
-        root.querySelectorAll('input, select, textarea, button, fieldset').forEach(el => {
-          el.disabled = !!on;
-        });
+        root.querySelectorAll('input, select, textarea, button, fieldset')
+            .forEach(el => { el.disabled = !!on; });
       };
-
+    
       const updateBottomCategory = () => {
-        const selectedCat = scope.querySelector('input[name="bottomCat"]:checked')?.value || 'pants';
-        const fsPants = scope.querySelector('#fsBottom_pants');
-        const fsSkirt = scope.querySelector('#fsBottom_skirt');
-        
+        const selectedCat = qs('input[name="bottomCat"]:checked')?.value || 'pants';
+        const fsPants = qs('#fsBottom_pants');
+        const fsSkirt = qs('#fsBottom_skirt');
         if (fsPants && fsSkirt) {
           if (selectedCat === 'pants') {
             fsPants.style.display = '';
@@ -664,17 +661,17 @@
           }
         }
       };
-
+    
       const applyOutfitMode = () => {
         const isOnepiece = getIsOnepiece();
-        const fsDress = $('#fsDress');
-        const dressPanel = $('#fsDress')?.closest('.panel');
-        const topPanel = $('#outfit_top')?.closest('.panel');
-        const fsPants = $('#fsBottom_pants');
-        const fsSkirt = $('#fsBottom_skirt');
-        const bottomCat = $('#bottomCategoryRadios')?.closest('.panel');
-        const shoesPanel = $('#outfit_shoes')?.closest('.panel');
-
+        const fsDress    = qs('#fsDress');
+        const dressPanel = qs('#fsDress')?.closest('.panel');
+        const topPanel   = qs('#outfit_top')?.closest('.panel');
+        const fsPants    = qs('#fsBottom_pants');
+        const fsSkirt    = qs('#fsBottom_skirt');
+        const bottomCat  = qs('#bottomCategoryRadios')?.closest('.panel');
+        const shoesPanel = qs('#outfit_shoes')?.closest('.panel');
+    
         if (isOnepiece) {
           setDisabledDeep(fsDress, false);
           if (dressPanel) setDisabledDeep(dressPanel, false);
@@ -692,23 +689,25 @@
           setDisabledDeep(fsDress, true);
           if (dressPanel) setDisabledDeep(dressPanel, true);
         }
-        
         updateBottomCategory();
       };
-
-      <!-- 修正後 -->
-      $$('#panel_outfitFixed input[name="outfitMode"]').forEach(r => {
+    
+      // outfitMode ラジオ: 変更で切替
+      qsa('#panel_outfitFixed input[name="outfitMode"]').forEach(r => {
         r.addEventListener('change', applyOutfitMode);
-        r.addEventListener('input', applyOutfitMode);
+        r.addEventListener('input',  applyOutfitMode);
       });
-
-      scope.querySelectorAll('input[name="bottomCat"]').forEach(radio => {
+    
+      // bottomCat ラジオ: パンツ/スカート切替
+      qsa('input[name="bottomCat"]').forEach(radio => {
         radio.addEventListener('change', updateBottomCategory);
       });
-
+    
       applyOutfitMode();
       window.addEventListener('pageshow', applyOutfitMode);
-      window.applyOutfitMode = applyOutfitMode;
+    
+      // デバッグ用（必要なければ削除OK）
+      window.applyOutfitMode      = applyOutfitMode;
       window.updateBottomCategory = updateBottomCategory;
     })();
   </script>
