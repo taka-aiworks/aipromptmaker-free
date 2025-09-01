@@ -1,4 +1,5 @@
-  "SFW": {
+{
+"SFW": {
    "age": [
       { "tag": "newborn", "label": "新生児" },
       { "tag": "toddler", "label": "幼児（1〜3歳）" },
@@ -829,4 +830,5 @@
     { "tag": "ducking", "label": "かがむ" },
     { "tag": "stretching", "label": "伸びをする" }
   ]
+}
 };
