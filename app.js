@@ -578,3 +578,6 @@ function initColorWheel(idBase, defaultHue = 0, defaultS = 80, defaultL = 50) {
     thumb.style.left = (centerX + radius * Math.cos(radians) - 7) + "px";
     thumb.style.top = (centerY + radius * Math.sin(radians) - 7) + "px";
   });
+  
+  return () => tag.textContent.trim();
+}
