@@ -353,6 +353,8 @@ async function loadDefaultDicts() {
 
 /* ===== レンダリング関数 ===== */
 function renderSFW() {
+  console.log("renderSFW開始", SFW);
+  
   radioList($("#bf_age"), SFW.age, "bf_age");
   radioList($("#bf_gender"), SFW.gender, "bf_gender");  
   radioList($("#bf_body"), SFW.body_type, "bf_body");
@@ -360,12 +362,21 @@ function renderSFW() {
   radioList($("#hairStyle"), SFW.hair_style, "hairStyle");
   radioList($("#eyeShape"), SFW.eyes, "eyeShape");
 
-  // 服カテゴリ別レンダリング
+  // 服カテゴリ別レンダリング（デバッグログ追加）
+  console.log("outfit配列:", SFW.outfit);
+  
   const outfitTop = SFW.outfit.filter(item => item.cat === "top");
   const outfitDress = SFW.outfit.filter(item => item.cat === "dress");
   const outfitPants = SFW.outfit.filter(item => item.cat === "pants");
   const outfitSkirt = SFW.outfit.filter(item => item.cat === "skirt");
   const outfitShoes = SFW.outfit.filter(item => item.cat === "shoes");
+
+  console.log("フィルタ結果:");
+  console.log("- トップス:", outfitTop);
+  console.log("- ドレス:", outfitDress);
+  console.log("- パンツ:", outfitPants);
+  console.log("- スカート:", outfitSkirt);
+  console.log("- 靴:", outfitShoes);
 
   radioList($("#outfit_top"), outfitTop, "outfit_top");
   radioList($("#outfit_dress"), outfitDress, "outfit_dress");
@@ -375,6 +386,8 @@ function renderSFW() {
 }
 
 function renderShooting() {
+  console.log("renderShooting開始", SFW);
+  
   radioList($("#s_bg"), SFW.background, "s_bg");
   radioList($("#s_pose"), SFW.pose, "s_pose");
   radioList($("#s_comp"), SFW.composition, "s_comp");
@@ -384,15 +397,25 @@ function renderShooting() {
 }
 
 function radioList(el, list, name, { checkFirst = true } = {}) {
-  if (!el) return;
+  if (!el) {
+    console.warn(`要素が見つかりません: ${name}`);
+    return;
+  }
+  
   const items = normList(list);
+  console.log(`radioList(${name}): ${items.length}個の項目`, items);
   
   el.innerHTML = '';
+  
+  if (items.length === 0) {
+    el.innerHTML = '<div class="mini">項目がありません</div>';
+    return;
+  }
   
   items.forEach((it, i) => {
     const showMini = it.tag && it.label && it.tag !== it.label;
     const checked = (checkFirst && i === 0);
-    const radioId = `${name}_${i}_${Date.now()}`;
+    const radioId = `${name}_${i}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     
     const label = document.createElement('label');
     label.className = 'chip';
