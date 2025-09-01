@@ -1,4 +1,21 @@
-/* =========================
+// 外部辞書を試行
+  const sfw = await tryFetch("dict/default_sfw.json");
+  if (sfw) { 
+    console.log("外部辞書読み込み成功");
+    mergeIntoSFW(sfw);
+    
+    // DOM準備完了を確認してからレンダリング
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        executeRenderWithDelay();
+        // 不足データの補完
+        ensureMissingData();
+      });
+    } else {
+      executeRenderWithDelay();
+      // 不足データの補完
+      ensureMissingData();
+    }/* =========================
    AI Prompt Maker Free Version – app.js v6.1修正版
    辞書読み込み問題修正
    ========================= */
@@ -135,6 +152,8 @@ function mergeIntoSFW(json) {
   const src = json?.SFW || json || {};
   const next = { ...SFW };
   
+  console.log("mergeIntoSFW開始。受け取ったデータ:", Object.keys(src));
+  
   const KEYMAP = {
     "髪型": "hair_style", "目の形": "eyes", "服": "outfit", "顔の特徴": "face",
     "体型": "skin_body", "視点": "view", "画風": "art_style", "背景": "background",
@@ -153,10 +172,21 @@ function mergeIntoSFW(json) {
 
   for (const [k, v] of Object.entries(src || {})) {
     const key = KEYMAP[k] || k;
-    if (next[key] === undefined) continue;
-    next[key] = dedupeByTag([...(next[key] || []), ...normList(v)]);
+    console.log(`Processing key: "${k}" -> "${key}", data length: ${v?.length || 0}`);
+    
+    if (next[key] === undefined) {
+      console.warn(`Key "${key}" not found in SFW structure, skipping`);
+      continue;
+    }
+    
+    const processedData = dedupeByTag([...(next[key] || []), ...normList(v)]);
+    next[key] = processedData;
+    console.log(`Merged ${processedData.length} items into ${key}`);
   }
+  
+  console.log("マージ完了後のSFW構造:", Object.keys(next).map(k => `${k}: ${next[k]?.length || 0}`));
   SFW = next;
+}
 }
 
 // フォールバック用の最小辞書（拡張版）
@@ -303,13 +333,87 @@ function loadFallbackDict() {
     document.addEventListener('DOMContentLoaded', () => {
       console.log("DOM準備完了後のレンダリング実行");
       executeRenderWithDelay();
+      // 不足データを強制補完
+      ensureMissingData();
     });
   } else {
     console.log("DOM既に準備済み、即座にレンダリング実行");
     executeRenderWithDelay();
+    // 不足データを強制補完
+    ensureMissingData();
   }
   
   toast("フォールバック辞書を読み込みました");
+}
+
+// 不足データの強制補完関数（修正版）
+function ensureMissingData() {
+  console.log("不足データの補完開始");
+  console.log("現在のSFW状態:", {
+    pose: SFW.pose?.length || 0,
+    composition: SFW.composition?.length || 0,
+    view: SFW.view?.length || 0
+  });
+  
+  let needsUpdate = false;
+  
+  // poseが空の場合の補完
+  if (!SFW.pose || SFW.pose.length === 0) {
+    console.log("poseデータを補完");
+    SFW.pose = [
+      { tag: "standing", label: "立っている", level: "L1" },
+      { tag: "sitting", label: "座っている", level: "L1" },
+      { tag: "walking", label: "歩いている", level: "L1" },
+      { tag: "running", label: "走っている", level: "L1" },
+      { tag: "arms at sides", label: "両手を下ろした", level: "L1" },
+      { tag: "hands on hips", label: "腰に手を当てた", level: "L1" },
+      { tag: "arms crossed", label: "腕を組んだ", level: "L1" }
+    ];
+    needsUpdate = true;
+  }
+  
+  // compositionが空の場合の補完
+  if (!SFW.composition || SFW.composition.length === 0) {
+    console.log("compositionデータを補完");
+    SFW.composition = [
+      { tag: "bust", label: "バストアップ", level: "L1" },
+      { tag: "upper body", label: "上半身", level: "L1" },
+      { tag: "full body", label: "全身", level: "L1" },
+      { tag: "portrait", label: "ポートレート", level: "L1" },
+      { tag: "close-up", label: "クローズアップ", level: "L1" }
+    ];
+    needsUpdate = true;
+  }
+  
+  // viewが空の場合の補完
+  if (!SFW.view || SFW.view.length === 0) {
+    console.log("viewデータを補完");
+    SFW.view = [
+      { tag: "front view", label: "正面", level: "L1" },
+      { tag: "three-quarter view", label: "斜め前", level: "L1" },
+      { tag: "side view", label: "横向き", level: "L1" },
+      { tag: "back view", label: "後ろ向き", level: "L1" },
+      { tag: "from above", label: "上から", level: "L1" },
+      { tag: "from below", label: "下から", level: "L1" }
+    ];
+    needsUpdate = true;
+  }
+  
+  console.log("補完後のSFW状態:", {
+    pose: SFW.pose?.length || 0,
+    composition: SFW.composition?.length || 0,
+    view: SFW.view?.length || 0
+  });
+  
+  // 補完が実行された場合のみ再レンダリング
+  if (needsUpdate) {
+    console.log("データ補完があったため、再レンダリング実行");
+    setTimeout(() => {
+      renderShooting();
+    }, 200);
+  } else {
+    console.log("全てのデータが既に存在するため、補完不要");
+  }
 }
 
 // レンダリング実行関数（遅延処理付き）
@@ -360,12 +464,20 @@ async function loadDefaultDicts() {
     
     // DOM準備完了を確認してからレンダリング
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', executeRenderWithDelay);
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM準備完了後のレンダリング実行（外部辞書使用）");
+        executeRenderWithDelay();
+        // 念のための不足データチェック（外部辞書でも欠けている場合のみ補完）
+        setTimeout(() => ensureMissingData(), 500);
+      });
     } else {
+      console.log("DOM既に準備済み、即座にレンダリング実行（外部辞書使用）");
       executeRenderWithDelay();
+      // 念のための不足データチェック
+      setTimeout(() => ensureMissingData(), 500);
     }
     
-    toast("SFW辞書を読み込みました"); 
+    toast("外部SFW辞書を読み込みました"); 
     return;
   }
 
