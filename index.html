@@ -696,7 +696,8 @@
         updateBottomCategory();
       };
 
-      $('#panel_outfitFixed input[name="outfitMode"]').forEach(r => {
+      <!-- 修正後 -->
+      $$('#panel_outfitFixed input[name="outfitMode"]').forEach(r => {
         r.addEventListener('change', applyOutfitMode);
         r.addEventListener('input', applyOutfitMode);
       });
