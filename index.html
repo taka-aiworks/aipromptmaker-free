@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI プロンプトメーカー 無料版 – 基本情報で簡単プロンプト生成</title>
-  <link rel="stylesheet" href="styles.css" />
+  <!-- <link rel="stylesheet" href="styles.css" /> -->
   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
 
   <meta name="description" content="AIプロンプトメーカー 無料版 – キャラの基本情報設定でプロンプトを簡単生成。プロ版では学習・量産・撮影モードも利用可能。">
@@ -21,6 +21,20 @@
   <meta name="twitter:image" content="image/ogp.png" />
 
   <style>
+    /* ベーススタイル */
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
     /* カラーホイール基本スタイル */
     .wheel-box {
       position: relative;
@@ -441,6 +455,50 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    /* ノート */
+    .note {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin: 8px 0;
+    }
+    
+    /* ステータス */
+    .status {
+      color: #666;
+    }
+    
+    /* 隠し要素 */
+    [hidden] {
+      display: none !important;
+    }
+    
+    /* トースト通知のスタイル */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      background: #333;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    }
+    
+    .toast:not([hidden]) {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  </style>between;
       margin-bottom: 15px;
     }
     
