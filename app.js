@@ -934,7 +934,6 @@ function initColorWheels() {
 }
 
 /* ===== 初期化 ===== */
-/* ===== 初期化の修正 ===== */
 function initApp() {
   console.log("アプリケーション初期化開始");
   
@@ -975,4 +974,16 @@ function initApp() {
     console.error("辞書読み込みエラー:", err);
     loadFallbackDict();
   });
-  
+
+
+   // 手動で撮影モードを再レンダリングするためのデバッグ関数
+window.debugRenderShooting = function() {
+  console.log("手動レンダリング実行");
+  console.log("SFW.background:", SFW.background);
+  console.log("SFW.pose:", SFW.pose);
+  console.log("SFW.composition:", SFW.composition);
+  console.log("SFW.view:", SFW.view);
+  console.log("SFW.expressions:", SFW.expressions);
+  console.log("SFW.lighting:", SFW.lighting);
+  renderShooting();
+};
