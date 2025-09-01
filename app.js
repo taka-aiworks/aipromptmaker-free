@@ -1,21 +1,4 @@
-// 外部辞書を試行
-  const sfw = await tryFetch("dict/default_sfw.json");
-  if (sfw) { 
-    console.log("外部辞書読み込み成功");
-    mergeIntoSFW(sfw);
-    
-    // DOM準備完了を確認してからレンダリング
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        executeRenderWithDelay();
-        // 不足データの補完
-        ensureMissingData();
-      });
-    } else {
-      executeRenderWithDelay();
-      // 不足データの補完
-      ensureMissingData();
-    }/* =========================
+/* =========================
    AI Prompt Maker Free Version – app.js v6.1修正版
    辞書読み込み問題修正
    ========================= */
@@ -186,7 +169,6 @@ function mergeIntoSFW(json) {
   
   console.log("マージ完了後のSFW構造:", Object.keys(next).map(k => `${k}: ${next[k]?.length || 0}`));
   SFW = next;
-}
 }
 
 // フォールバック用の最小辞書（拡張版）
@@ -1133,7 +1115,7 @@ function initColorWheels() {
 function initApp() {
   console.log("アプリケーション初期化開始");
   
-  // 辞書読み込み
+  // 辞書読み込み（Promiseベースで処理）
   loadDefaultDicts().then(() => {
     console.log("辞書読み込み完了");
   }).catch(err => {
