@@ -159,7 +159,7 @@ function mergeIntoSFW(json) {
   SFW = next;
 }
 
-// フォールバック用の最小辞書
+// フォールバック用の最小辞書（拡張版）
 function loadFallbackDict() {
   const fallbackSFW = {
     hair_style: [
@@ -223,55 +223,96 @@ function loadFallbackDict() {
     height: [
       { tag: "average height", label: "平均身長", level: "L1" }
     ],
+    // 撮影モード用の要素を追加
     background: [
       { tag: "plain background", label: "シンプルな背景", level: "L1" },
       { tag: "white background", label: "白背景", level: "L1" },
+      { tag: "gray background", label: "グレー背景", level: "L1" },
       { tag: "outdoors", label: "屋外", level: "L1" },
       { tag: "park", label: "公園", level: "L1" },
-      { tag: "classroom", label: "教室", level: "L1" }
+      { tag: "street", label: "街中", level: "L1" },
+      { tag: "beach", label: "ビーチ", level: "L1" },
+      { tag: "classroom", label: "教室", level: "L1" },
+      { tag: "office", label: "オフィス", level: "L1" },
+      { tag: "cafe", label: "カフェ", level: "L1" }
     ],
     pose: [
       { tag: "standing", label: "立っている", level: "L1" },
       { tag: "sitting", label: "座っている", level: "L1" },
+      { tag: "walking", label: "歩いている", level: "L1" },
+      { tag: "running", label: "走っている", level: "L1" },
       { tag: "arms at sides", label: "両手を下ろした", level: "L1" },
-      { tag: "waving", label: "手を振っている", level: "L1" }
+      { tag: "hands on hips", label: "腰に手を当てた", level: "L1" },
+      { tag: "arms crossed", label: "腕を組んだ", level: "L1" },
+      { tag: "waving", label: "手を振っている", level: "L1" },
+      { tag: "peace sign", label: "ピースサイン", level: "L1" },
+      { tag: "leaning forward", label: "前かがみ", level: "L1" }
     ],
     composition: [
       { tag: "bust", label: "バストアップ", level: "L1" },
+      { tag: "upper body", label: "上半身", level: "L1" },
       { tag: "full body", label: "全身", level: "L1" },
-      { tag: "portrait", label: "ポートレート", level: "L1" }
+      { tag: "portrait", label: "ポートレート", level: "L1" },
+      { tag: "close-up", label: "クローズアップ", level: "L1" },
+      { tag: "wide shot", label: "ワイドショット", level: "L1" },
+      { tag: "medium shot", label: "ミディアムショット", level: "L1" }
     ],
     view: [
       { tag: "front view", label: "正面", level: "L1" },
       { tag: "three-quarter view", label: "斜め前", level: "L1" },
-      { tag: "side view", label: "横向き", level: "L1" }
+      { tag: "side view", label: "横向き", level: "L1" },
+      { tag: "back view", label: "後ろ向き", level: "L1" },
+      { tag: "from above", label: "上から", level: "L1" },
+      { tag: "from below", label: "下から", level: "L1" },
+      { tag: "looking up", label: "見上げる", level: "L1" },
+      { tag: "looking down", label: "見下ろす", level: "L1" }
     ],
     expressions: [
       { tag: "neutral expression", label: "普通の表情", level: "L1" },
       { tag: "smiling", label: "笑顔", level: "L1" },
-      { tag: "serious", label: "真剣", level: "L1" }
+      { tag: "happy", label: "嬉しそう", level: "L1" },
+      { tag: "serious", label: "真剣", level: "L1" },
+      { tag: "surprised", label: "驚いた", level: "L1" },
+      { tag: "confused", label: "困惑", level: "L1" },
+      { tag: "shy", label: "恥ずかしがり", level: "L1" },
+      { tag: "angry", label: "怒った", level: "L1" },
+      { tag: "sad", label: "悲しい", level: "L1" }
     ],
     lighting: [
       { tag: "even lighting", label: "均等な照明", level: "L1" },
       { tag: "soft lighting", label: "柔らかい照明", level: "L1" },
-      { tag: "window light", label: "窓からの光", level: "L1" }
+      { tag: "natural lighting", label: "自然光", level: "L1" },
+      { tag: "window light", label: "窓からの光", level: "L1" },
+      { tag: "sunlight", label: "日光", level: "L1" },
+      { tag: "golden hour", label: "ゴールデンアワー", level: "L1" },
+      { tag: "dramatic lighting", label: "ドラマチック照明", level: "L1" },
+      { tag: "backlight", label: "逆光", level: "L1" },
+      { tag: "studio lighting", label: "スタジオ照明", level: "L1" }
     ]
   };
   
   mergeIntoSFW({ SFW: fallbackSFW });
-  renderSFW();
-  renderShooting();
+  
+  // 重要：レンダリングを確実に実行
+  setTimeout(() => {
+    renderSFW();
+    renderShooting();
+    console.log("フォールバック辞書とレンダリング完了");
+  }, 100);
+  
   toast("フォールバック辞書を読み込みました");
 }
 
 /* ===== 辞書読み込み ===== */
+/* ===== 辞書読み込み修正版 ===== */
 async function loadDefaultDicts() {
   const tryFetch = async (path) => {
     try {
       const r = await fetch(path, { cache: "no-store" });
       if (!r.ok) throw new Error("bad status");
       return await r.json();
-    } catch (_) { 
+    } catch (err) { 
+      console.warn(`Failed to fetch ${path}:`, err);
       return null; 
     }
   };
@@ -279,17 +320,24 @@ async function loadDefaultDicts() {
   // 外部辞書を試行
   const sfw = await tryFetch("dict/default_sfw.json");
   if (sfw) { 
-    mergeIntoSFW(sfw); 
-    renderSFW(); 
-    renderShooting();
+    mergeIntoSFW(sfw);
+    
+    // レンダリングを確実に実行
+    setTimeout(() => {
+      renderSFW(); 
+      renderShooting();
+      console.log("外部辞書読み込みとレンダリング完了");
+    }, 100);
+    
     toast("SFW辞書を読み込みました"); 
-    return; // 外部辞書が成功したらフォールバックは実行しない
+    return;
   }
 
   // フォールバック辞書
   console.warn("外部辞書読み込み失敗。フォールバック辞書を使用。");
   loadFallbackDict();
 }
+
 
 /* ===== レンダリング関数 ===== */
 function renderSFW() {
@@ -348,15 +396,31 @@ function renderSFW() {
   radioList($("#outfit_shoes"), outfitShoes, "outfit_shoes");
 }
 
+/* ===== レンダリング関数の修正 ===== */
 function renderShooting() {
-  radioList($("#s_bg"), SFW.background, "s_bg");
-  radioList($("#s_pose"), SFW.pose, "s_pose");
-  radioList($("#s_comp"), SFW.composition, "s_comp");
-  radioList($("#s_view"), SFW.view, "s_view");
-  radioList($("#s_expr"), SFW.expressions, "s_expr");
-  radioList($("#s_light"), SFW.lighting, "s_light");
+  console.log("renderShooting called"); // デバッグ用
+  
+  // 各要素の存在確認とレンダリング
+  const elements = [
+    { id: "#s_bg", data: SFW.background, name: "s_bg" },
+    { id: "#s_pose", data: SFW.pose, name: "s_pose" },
+    { id: "#s_comp", data: SFW.composition, name: "s_comp" },
+    { id: "#s_view", data: SFW.view, name: "s_view" },
+    { id: "#s_expr", data: SFW.expressions, name: "s_expr" },
+    { id: "#s_light", data: SFW.lighting, name: "s_light" }
+  ];
+  
+  elements.forEach(({ id, data, name }) => {
+    const element = $(id);
+    if (!element) {
+      console.warn(`Element not found: ${id}`);
+      return;
+    }
+    
+    console.log(`Rendering ${name} with data:`, data);
+    radioList(element, data, name);
+  });
 }
-
 function radioList(el, list, name, { checkFirst = true } = {}) {
   if (!el) return;
   const items = normList(list);
@@ -870,30 +934,45 @@ function initColorWheels() {
 }
 
 /* ===== 初期化 ===== */
+/* ===== 初期化の修正 ===== */
 function initApp() {
   console.log("アプリケーション初期化開始");
   
   // 辞書読み込み
   loadDefaultDicts().then(() => {
     console.log("辞書読み込み完了");
+    
+    // 追加の安全確認：DOM要素が存在するかチェック
+    const checkAndRender = () => {
+      const shootingElements = [
+        document.getElementById('s_bg'),
+        document.getElementById('s_pose'),
+        document.getElementById('s_comp'),
+        document.getElementById('s_view'),
+        document.getElementById('s_expr'),
+        document.getElementById('s_light')
+      ];
+      
+      const allExist = shootingElements.every(el => el !== null);
+      
+      if (allExist) {
+        console.log("撮影モード要素が全て存在します");
+        renderShooting();
+      } else {
+        console.warn("撮影モード要素が見つからない:", shootingElements.map((el, i) => el ? 'OK' : 'NG'));
+        // 少し待ってから再試行
+        setTimeout(() => {
+          if (document.getElementById('s_bg')) {
+            renderShooting();
+          }
+        }, 500);
+      }
+    };
+    
+    checkAndRender();
+    
   }).catch(err => {
     console.error("辞書読み込みエラー:", err);
     loadFallbackDict();
   });
   
-  // 色ホイール初期化
-  initColorWheels();
-  
-  // イベントハンドラー設定
-  setupBasicHandlers();
-  setupShootingHandlers();
-  
-  console.log("アプリケーション初期化完了");
-}
-
-// DOMContentLoaded イベントで初期化
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
