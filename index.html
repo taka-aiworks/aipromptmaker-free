@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI プロンプトメーカー 無料版 – 基本情報で簡単プロンプト生成</title>
-  <!-- <link rel="stylesheet" href="styles.css" /> -->
+  <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/x-icon" href="image/favicon.ico">
 
   <meta name="description" content="AIプロンプトメーカー 無料版 – キャラの基本情報設定でプロンプトを簡単生成。プロ版では学習・量産・撮影モードも利用可能。">
@@ -21,268 +21,6 @@
   <meta name="twitter:image" content="image/ogp.png" />
 
   <style>
-    /* ベーススタイル */
-    * {
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-      color: #333;
-      line-height: 1.6;
-    }
-    
-    /* カラーホイール基本スタイル */
-    .wheel-box {
-      position: relative;
-      width: 80px;
-      height: 80px;
-      margin: 8px auto;
-    }
-    
-    .wheel {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: conic-gradient(
-        hsl(0, 100%, 50%),
-        hsl(60, 100%, 50%),
-        hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%),
-        hsl(240, 100%, 50%),
-        hsl(300, 100%, 50%),
-        hsl(360, 100%, 50%)
-      );
-      cursor: pointer;
-      position: relative;
-    }
-    
-    .thumb {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 2px solid white;
-      background: #333;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      z-index: 10;
-      pointer-events: none;
-    }
-    
-    .swatch {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
-    
-    .tag {
-      background: #f0f0f0;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: monospace;
-      font-size: 0.9em;
-    }
-    
-    /* チップスタイル */
-    .chip {
-      display: inline-block;
-      background: #f5f5f5;
-      border: 1px solid #ddd;
-      border-radius: 16px;
-      padding: 6px 12px;
-      margin: 2px;
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-    
-    .chip:hover {
-      background: #e9ecef;
-      border-color: #adb5bd;
-    }
-    
-    .chip input[type="radio"] {
-      display: none;
-    }
-    
-    .chip input[type="radio"]:checked + span,
-    .chip:has(input[type="radio"]:checked) {
-      background: #007bff;
-      color: white;
-      border-color: #0056b3;
-    }
-    
-    .chip .mini {
-      opacity: 0.7;
-      font-size: 0.8em;
-    }
-    
-    /* スクロールエリア */
-    .scroller {
-      max-height: 120px;
-      overflow-y: auto;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 8px;
-      background: #fafafa;
-    }
-    
-    /* グリッドレイアウト */
-    .grid {
-      display: grid;
-      gap: 15px;
-    }
-    
-    .g2 { grid-template-columns: 1fr 1fr; }
-    .g3 { grid-template-columns: 1fr 1fr 1fr; }
-    .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-    
-    @media (max-width: 768px) {
-      .g3, .g4 { grid-template-columns: 1fr 1fr; }
-    }
-    
-    @media (max-width: 480px) {
-      .g2, .g3, .g4 { grid-template-columns: 1fr; }
-    }
-    
-    /* パネルとカード */
-    .panel {
-      background: white;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 12px;
-    }
-    
-    .card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    
-    .card-title {
-      margin: 0 0 15px;
-      font-size: 1.4em;
-      color: #333;
-    }
-    
-    /* 出力エリア */
-    .out {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 0.9em;
-      min-height: 60px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    
-    /* ボタンスタイル */
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: all 0.2s;
-    }
-    
-    .btn.ok {
-      background: #28a745;
-      color: white;
-    }
-    
-    .btn.ok:hover {
-      background: #218838;
-    }
-    
-    .btn.ghost {
-      background: transparent;
-      border: 1px solid #6c757d;
-      color: #6c757d;
-    }
-    
-    .btn.ghost:hover {
-      background: #6c757d;
-      color: white;
-    }
-    
-    .btn.small {
-      padding: 4px 8px;
-      font-size: 0.8em;
-    }
-    
-    /* インライン要素 */
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    
-    .mini {
-      font-size: 0.85em;
-      color: #666;
-    }
-    
-    .muted {
-      opacity: 0.7;
-    }
-    
-    .inline {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    
-    /* フォーム要素 */
-    input[type="text"], input[type="range"], textarea, select {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 6px 8px;
-      font-size: 0.9em;
-    }
-    
-    input[type="range"] {
-      flex: 1;
-    }
-    
-    textarea {
-      width: 100%;
-      resize: vertical;
-      font-family: inherit;
-    }
-    
-    label {
-      display: block;
-      margin: 8px 0 4px;
-      font-weight: 500;
-      color: #333;
-    }
-    
-    /* 無効化スタイル */
-    .is-disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    
-    fieldset[disabled] {
-      opacity: 0.6;
-    }
-    
     /* プロ版制限エリアのスタイル */
     .pro-only-overlay {
       position: relative;
@@ -336,59 +74,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
-    /* ヘッダーとタブ */
-    .header {
-      background: #f8f9fa;
-      border-bottom: 1px solid #e9ecef;
-      padding: 10px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    
-    .inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    
-    .tabbar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    
-    .tab {
-      padding: 8px 16px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 6px 6px 0 0;
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-    
-    .tab:hover {
-      background: #f0f0f0;
-    }
-    
-    .tab.active {
-      background: #007bff;
-      color: white;
-      border-color: #0056b3;
-    }
-    
-    .tab.disabled {
-      opacity: 0.6;
-      position: relative;
-    }
-    
-    .tab.disabled::after {
-      content: "🔒";
-      margin-left: 5px;
-      font-size: 0.8em;
-    }
-    
     /* ヘッダーのプロ版ボタン */
     .header-pro-btn {
       background: linear-gradient(135deg, #ff6b35, #f7931e);
@@ -425,6 +110,18 @@
       margin-left: 8px;
     }
 
+    /* タブの制限表示 */
+    .tab.disabled {
+      opacity: 0.6;
+      position: relative;
+    }
+    
+    .tab.disabled::after {
+      content: "🔒";
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+
     /* 無料版制限表示 */
     .free-limit-note {
       background: #e8f4fd;
@@ -434,91 +131,6 @@
       margin: 8px 0;
       color: #0c5460;
       font-size: 0.9em;
-    }
-    
-    /* コンテナ */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    /* セパレーター */
-    .sep {
-      border: none;
-      border-top: 1px solid #e0e0e0;
-      margin: 20px 0;
-    }
-    
-    /* ヘッダー行 */
-    .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 15px;
-    }
-    
-    /* ノート */
-    .note {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
-      padding: 8px 12px;
-      margin: 8px 0;
-    }
-    
-    /* ステータス */
-    .status {
-      color: #666;
-    }
-    
-    /* 隠し要素 */
-    [hidden] {
-      display: none !important;
-    }
-    
-    /* トースト通知のスタイル */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-      background: #333;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      font-size: 14px;
-      max-width: 300px;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
-    }
-    
-    .toast:not([hidden]) {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  </style>between;
-      margin-bottom: 15px;
-    }
-    
-    /* ノート */
-    .note {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
-      padding: 8px 12px;
-      margin: 8px 0;
-    }
-    
-    /* ステータス */
-    .status {
-      color: #666;
-    }
-    
-    /* 隠し要素 */
-    [hidden] {
-      display: none !important;
     }
   </style>
 </head>
@@ -962,9 +574,6 @@
     </section>
   </main>
 
-  <!-- トースト通知（オプション） -->
-  <div id="toast" class="toast" hidden></div>
-
   <script src="app.js" defer></script>
   <script>
     // 無料版用のタブ切り替え機能
@@ -1020,7 +629,7 @@
       const scope = document.getElementById('panelBasic');
       if (!scope) return;
     
-      // グローバルの $ / $ を壊さないために別名を使用
+      // グローバルの $ / $$ を壊さないために別名を使用
       const qs  = (sel) => scope.querySelector(sel);
       const qsa = (sel) => Array.from(scope.querySelectorAll(sel)); // ←必ず配列化
     
@@ -1071,13 +680,6 @@
           setDisabledDeep(fsPants, true);
           setDisabledDeep(fsSkirt, true);
           setDisabledDeep(bottomCat, true);
-          
-          // 下カラーも無効化
-          const bottomColorCheckbox = document.getElementById('useBottomColor');
-          if (bottomColorCheckbox) {
-            bottomColorCheckbox.checked = false;
-            bottomColorCheckbox.disabled = true;
-          }
         } else {
           setDisabledDeep(topPanel, false);
           setDisabledDeep(fsPants, false);
@@ -1086,12 +688,6 @@
           if (shoesPanel) setDisabledDeep(shoesPanel, false);
           setDisabledDeep(fsDress, true);
           if (dressPanel) setDisabledDeep(dressPanel, true);
-          
-          // 下カラーも有効化
-          const bottomColorCheckbox = document.getElementById('useBottomColor');
-          if (bottomColorCheckbox) {
-            bottomColorCheckbox.disabled = false;
-          }
         }
         updateBottomCategory();
       };
@@ -1115,29 +711,5 @@
       window.updateBottomCategory = updateBottomCategory;
     })();
   </script>
-
-  <style>
-    /* トースト通知のスタイル */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-      background: #333;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      font-size: 14px;
-      max-width: 300px;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
-    }
-    
-    .toast:not([hidden]) {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  </style>
 </body>
 </html>
