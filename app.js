@@ -365,11 +365,58 @@ function renderSFW() {
   // 服カテゴリ別レンダリング（デバッグログ追加）
   console.log("outfit配列:", SFW.outfit);
   
-  const outfitTop = SFW.outfit.filter(item => item.cat === "top");
-  const outfitDress = SFW.outfit.filter(item => item.cat === "dress");
-  const outfitPants = SFW.outfit.filter(item => item.cat === "pants");
-  const outfitSkirt = SFW.outfit.filter(item => item.cat === "skirt");
-  const outfitShoes = SFW.outfit.filter(item => item.cat === "shoes");
+  // 最初の数個のoutfit項目の構造を詳しく確認
+  if (SFW.outfit.length > 0) {
+    console.log("outfit[0]の構造:", SFW.outfit[0]);
+    console.log("outfit[1]の構造:", SFW.outfit[1]);
+    console.log("outfit[2]の構造:", SFW.outfit[2]);
+    
+    // catプロパティの種類を確認
+    const catValues = SFW.outfit.map(item => item.cat).filter(Boolean);
+    const uniqueCats = [...new Set(catValues)];
+    console.log("存在するcat値:", uniqueCats);
+  }
+  
+  // より柔軟なフィルタリング（catがない場合はtagやlabelから推測）
+  const outfitTop = SFW.outfit.filter(item => {
+    return item.cat === "top" || 
+           item.category === "top" ||
+           item.type === "top" ||
+           (item.tag && /shirt|blouse|sweater|hoodie|top|jacket|coat/i.test(item.tag)) ||
+           (item.label && /シャツ|ブラウス|セーター|フーディー|トップ|ジャケット|コート/i.test(item.label));
+  });
+  
+  const outfitDress = SFW.outfit.filter(item => {
+    return item.cat === "dress" || 
+           item.category === "dress" ||
+           item.type === "dress" ||
+           (item.tag && /dress|gown|sundress/i.test(item.tag)) ||
+           (item.label && /ドレス|ワンピース/i.test(item.label));
+  });
+  
+  const outfitPants = SFW.outfit.filter(item => {
+    return item.cat === "pants" || 
+           item.category === "pants" ||
+           item.type === "pants" ||
+           (item.tag && /jeans|pants|trousers|shorts|leggings/i.test(item.tag)) ||
+           (item.label && /ジーンズ|パンツ|ズボン|ショーツ|レギンス/i.test(item.label));
+  });
+  
+  const outfitSkirt = SFW.outfit.filter(item => {
+    return item.cat === "skirt" || 
+           item.category === "skirt" ||
+           item.type === "skirt" ||
+           (item.tag && /skirt/i.test(item.tag)) ||
+           (item.label && /スカート/i.test(item.label));
+  });
+  
+  const outfitShoes = SFW.outfit.filter(item => {
+    return item.cat === "shoes" || 
+           item.category === "shoes" ||
+           item.type === "shoes" ||
+           (item.tag && /shoes|boots|sneakers|heels|sandals|flats/i.test(item.tag)) ||
+           (item.label && /靴|シューズ|ブーツ|スニーカー|ヒール|サンダル/i.test(item.label));
+  });
 
   console.log("フィルタ結果:");
   console.log("- トップス:", outfitTop);
@@ -387,6 +434,17 @@ function renderSFW() {
 
 function renderShooting() {
   console.log("renderShooting開始", SFW);
+  
+  // 各カテゴリの最初の項目をデバッグ表示
+  if (SFW.pose && SFW.pose.length > 0) {
+    console.log("pose[0]の構造:", SFW.pose[0]);
+  }
+  if (SFW.composition && SFW.composition.length > 0) {
+    console.log("composition[0]の構造:", SFW.composition[0]);
+  }
+  if (SFW.view && SFW.view.length > 0) {
+    console.log("view[0]の構造:", SFW.view[0]);
+  }
   
   radioList($("#s_bg"), SFW.background, "s_bg");
   radioList($("#s_pose"), SFW.pose, "s_pose");
