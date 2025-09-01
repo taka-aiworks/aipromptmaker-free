@@ -613,16 +613,14 @@
         });
       });
       
-      // 購入リンクの処理（実際のURLに変更してください）
-      document.querySelectorAll('a[href="#purchase-link"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          // ここに実際の購入ページのURLを設定
-          // window.open('https://your-store.com/ai-prompt-maker-pro', '_blank');
-          alert('Pro版の購入ページに移動します。\n（実際の販売時はここに購入URLを設定してください）');
-        });
-      });
+  document.querySelectorAll('a[href="#purchase-link"]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      // Pro版の購入ページを新しいタブで開く
+      window.open('https://note.com/taka_aiworks/n/n2649a6548cad', '_blank');
     });
+  });
+});
     
     // 基本情報タブのスクリプト（元のコードから必要部分を抜粋）
     (() => {
