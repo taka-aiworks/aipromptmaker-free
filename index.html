@@ -628,7 +628,12 @@
     (() => {
       const scope = document.getElementById('panelBasic');
       if (!scope) return;
-            
+
+      // 削除：これがJavaScriptファイルの $ と重複していた
+      const $ = (sel) => scope.querySelector(sel);
+      const $$ = (sel) => scope.querySelectorAll(sel);
+
+      
       const getIsOnepiece = () => {
         const r = scope.querySelector('input[name="outfitMode"]:checked');
         return r?.value === 'onepiece';
