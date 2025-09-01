@@ -1,6 +1,6 @@
 /* =========================
-   AI Prompt Maker Free Version – app.js v6.1
-   無料版：基本情報 + 簡易撮影モード対応
+   AI Prompt Maker Free Version – app.js v6.1修正版
+   辞書読み込み問題修正
    ========================= */
 
 /* ========= ユーティリティ & 状態 ========= */
@@ -98,7 +98,7 @@ function toTag(txt) {
   return normalizeTag(txt);
 }
 
-/* ===== 辞書（無料版：基本機能のみ） ===== */
+/* ===== 辞書（修正版） ===== */
 let SFW = {
   hair_style: [], eyes: [], outfit: [], face: [], skin_body: [], art_style: [], background: [],
   pose: [], composition: [], view: [], expressions: [], accessories: [], lighting: [],
@@ -161,6 +161,8 @@ function mergeIntoSFW(json) {
 
 // フォールバック用の最小辞書（拡張版）
 function loadFallbackDict() {
+  console.log("フォールバック辞書を読み込み中...");
+  
   const fallbackSFW = {
     hair_style: [
       { tag: "long hair", label: "ロングヘア", level: "L1" },
@@ -291,26 +293,59 @@ function loadFallbackDict() {
     ]
   };
   
+  console.log("フォールバック辞書データ:", fallbackSFW);
   mergeIntoSFW({ SFW: fallbackSFW });
   
-  // 重要：レンダリングを確実に実行
-  setTimeout(() => {
-    renderSFW();
-    renderShooting();
-    console.log("フォールバック辞書とレンダリング完了");
-  }, 100);
+  console.log("mergeIntoSFW完了。SFW内容:", SFW);
+  
+  // DOM準備完了を確認してからレンダリング
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("DOM準備完了後のレンダリング実行");
+      executeRenderWithDelay();
+    });
+  } else {
+    console.log("DOM既に準備済み、即座にレンダリング実行");
+    executeRenderWithDelay();
+  }
   
   toast("フォールバック辞書を読み込みました");
 }
 
-/* ===== 辞書読み込み ===== */
+// レンダリング実行関数（遅延処理付き）
+function executeRenderWithDelay() {
+  // 複数回実行して確実にレンダリング
+  setTimeout(() => {
+    console.log("1回目レンダリング");
+    renderSFW();
+    renderShooting();
+  }, 100);
+  
+  setTimeout(() => {
+    console.log("2回目レンダリング");
+    renderSFW();
+    renderShooting();
+  }, 500);
+  
+  setTimeout(() => {
+    console.log("3回目レンダリング");
+    renderSFW();
+    renderShooting();
+  }, 1000);
+}
+
 /* ===== 辞書読み込み修正版 ===== */
 async function loadDefaultDicts() {
+  console.log("辞書読み込み開始");
+  
   const tryFetch = async (path) => {
     try {
+      console.log(`Fetching: ${path}`);
       const r = await fetch(path, { cache: "no-store" });
-      if (!r.ok) throw new Error("bad status");
-      return await r.json();
+      if (!r.ok) throw new Error(`Status: ${r.status}`);
+      const data = await r.json();
+      console.log(`Successfully loaded: ${path}`, data);
+      return data;
     } catch (err) { 
       console.warn(`Failed to fetch ${path}:`, err);
       return null; 
@@ -320,14 +355,15 @@ async function loadDefaultDicts() {
   // 外部辞書を試行
   const sfw = await tryFetch("dict/default_sfw.json");
   if (sfw) { 
+    console.log("外部辞書読み込み成功");
     mergeIntoSFW(sfw);
     
-    // レンダリングを確実に実行
-    setTimeout(() => {
-      renderSFW(); 
-      renderShooting();
-      console.log("外部辞書読み込みとレンダリング完了");
-    }, 100);
+    // DOM準備完了を確認してからレンダリング
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', executeRenderWithDelay);
+    } else {
+      executeRenderWithDelay();
+    }
     
     toast("SFW辞書を読み込みました"); 
     return;
@@ -338,17 +374,32 @@ async function loadDefaultDicts() {
   loadFallbackDict();
 }
 
-
-/* ===== レンダリング関数 ===== */
+/* ===== レンダリング関数（修正版） ===== */
 function renderSFW() {
-  radioList($("#bf_age"), SFW.age, "bf_age");
-  radioList($("#bf_gender"), SFW.gender, "bf_gender");  
-  radioList($("#bf_body"), SFW.body_type, "bf_body");
-  radioList($("#bf_height"), SFW.height, "bf_height");
-  radioList($("#hairStyle"), SFW.hair_style, "hairStyle");
-  radioList($("#eyeShape"), SFW.eyes, "eyeShape");
+  console.log("renderSFW() 実行開始");
+  console.log("SFW辞書内容確認:", SFW);
+  
+  // 基本要素のレンダリング
+  const basicElements = [
+    { id: "#bf_age", data: SFW.age, name: "bf_age" },
+    { id: "#bf_gender", data: SFW.gender, name: "bf_gender" },
+    { id: "#bf_body", data: SFW.body_type, name: "bf_body" },
+    { id: "#bf_height", data: SFW.height, name: "bf_height" },
+    { id: "#hairStyle", data: SFW.hair_style, name: "hairStyle" },
+    { id: "#eyeShape", data: SFW.eyes, name: "eyeShape" }
+  ];
+  
+  basicElements.forEach(({ id, data, name }) => {
+    const element = $(id);
+    if (!element) {
+      console.warn(`Element not found: ${id}`);
+      return;
+    }
+    console.log(`Rendering ${name} with ${data?.length} items`);
+    radioList(element, data, name);
+  });
 
-  // 服カテゴリ別レンダリング
+  // 服カテゴリ別レンダリング（修正版）
   const outfitTop = SFW.outfit.filter(item => {
     return item.cat === "top" || 
            item.category === "top" ||
@@ -389,16 +440,37 @@ function renderSFW() {
            (item.label && /靴|シューズ|ブーツ|スニーカー|ヒール|サンダル/i.test(item.label));
   });
 
-  radioList($("#outfit_top"), outfitTop, "outfit_top");
-  radioList($("#outfit_dress"), outfitDress, "outfit_dress");
-  radioList($("#outfit_pants"), outfitPants, "outfit_pants");
-  radioList($("#outfit_skirt"), outfitSkirt, "outfit_skirt");
-  radioList($("#outfit_shoes"), outfitShoes, "outfit_shoes");
+  const outfitElements = [
+    { id: "#outfit_top", data: outfitTop, name: "outfit_top" },
+    { id: "#outfit_dress", data: outfitDress, name: "outfit_dress" },
+    { id: "#outfit_pants", data: outfitPants, name: "outfit_pants" },
+    { id: "#outfit_skirt", data: outfitSkirt, name: "outfit_skirt" },
+    { id: "#outfit_shoes", data: outfitShoes, name: "outfit_shoes" }
+  ];
+  
+  outfitElements.forEach(({ id, data, name }) => {
+    const element = $(id);
+    if (!element) {
+      console.warn(`Element not found: ${id}`);
+      return;
+    }
+    console.log(`Rendering ${name} with ${data?.length} items`);
+    radioList(element, data, name);
+  });
+  
+  console.log("renderSFW() 実行完了");
 }
 
-/* ===== レンダリング関数の修正 ===== */
 function renderShooting() {
-  console.log("renderShooting called"); // デバッグ用
+  console.log("renderShooting() 実行開始");
+  console.log("撮影モード用辞書確認:", {
+    background: SFW.background?.length,
+    pose: SFW.pose?.length,
+    composition: SFW.composition?.length,
+    view: SFW.view?.length,
+    expressions: SFW.expressions?.length,
+    lighting: SFW.lighting?.length
+  });
   
   // 各要素の存在確認とレンダリング
   const elements = [
@@ -417,18 +489,28 @@ function renderShooting() {
       return;
     }
     
-    console.log(`Rendering ${name} with data:`, data);
+    console.log(`Rendering ${name} with ${data?.length || 0} items`);
     radioList(element, data, name);
   });
+  
+  console.log("renderShooting() 実行完了");
 }
+
+// radioList関数（デバッグ強化版）
 function radioList(el, list, name, { checkFirst = true } = {}) {
-  if (!el) return;
+  if (!el) {
+    console.warn(`radioList: 要素が見つかりません - ${name}`);
+    return;
+  }
+  
   const items = normList(list);
+  console.log(`radioList: ${name} に ${items.length} 個のアイテムをレンダリング`, items);
   
   el.innerHTML = '';
   
   if (items.length === 0) {
     el.innerHTML = '<div class="mini">項目がありません</div>';
+    console.warn(`radioList: ${name} に項目がありません`);
     return;
   }
   
@@ -472,6 +554,8 @@ function radioList(el, list, name, { checkFirst = true } = {}) {
       }
     });
   });
+  
+  console.log(`radioList: ${name} のレンダリング完了`);
 }
 
 const getOne = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || "";
@@ -940,43 +1024,15 @@ function initApp() {
   // 辞書読み込み
   loadDefaultDicts().then(() => {
     console.log("辞書読み込み完了");
-    
-    // 追加の安全確認：DOM要素が存在するかチェック
-    const checkAndRender = () => {
-      const shootingElements = [
-        document.getElementById('s_bg'),
-        document.getElementById('s_pose'),
-        document.getElementById('s_comp'),
-        document.getElementById('s_view'),
-        document.getElementById('s_expr'),
-        document.getElementById('s_light')
-      ];
-      
-      const allExist = shootingElements.every(el => el !== null);
-      
-      if (allExist) {
-        console.log("撮影モード要素が全て存在します");
-        renderShooting();
-      } else {
-        console.warn("撮影モード要素が見つからない:", shootingElements.map((el, i) => el ? 'OK' : 'NG'));
-        // 少し待ってから再試行
-        setTimeout(() => {
-          if (document.getElementById('s_bg')) {
-            renderShooting();
-          }
-        }, 500);
-      }
-    };
-    
-    checkAndRender();
-    
   }).catch(err => {
     console.error("辞書読み込みエラー:", err);
     loadFallbackDict();
   });
   
   // 色ホイール初期化
-  initColorWheels();
+  setTimeout(() => {
+    initColorWheels();
+  }, 100);
   
   // イベントハンドラー設定
   setupBasicHandlers();
@@ -993,11 +1049,24 @@ function initApp() {
           renderShooting();
           console.log("撮影タブ切り替えでレンダリング実行");
         }, 100);
+      } else if (mode === 'basic') {
+        // 基本タブが選択されたときに再レンダリング
+        setTimeout(() => {
+          renderSFW();
+          console.log("基本タブ切り替えでレンダリング実行");
+        }, 100);
       }
     });
   });
   
   console.log("アプリケーション初期化完了");
+}
+
+// DOM読み込み完了時に初期化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
 
 // 手動で撮影モードを再レンダリングするためのデバッグ関数
@@ -1010,4 +1079,11 @@ window.debugRenderShooting = function() {
   console.log("SFW.expressions:", SFW.expressions);
   console.log("SFW.lighting:", SFW.lighting);
   renderShooting();
+};
+
+// 手動で基本情報を再レンダリングするためのデバッグ関数
+window.debugRenderSFW = function() {
+  console.log("手動SFWレンダリング実行");
+  console.log("SFW内容:", SFW);
+  renderSFW();
 };
