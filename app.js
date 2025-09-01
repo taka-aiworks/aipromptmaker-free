@@ -1,6 +1,6 @@
 /* =========================
    AI Prompt Maker Free Version – app.js v6.1
-   案1: 簡易撮影モード対応 + プロ版同一辞書読み込み + 修正版
+   無料版：基本情報 + 簡易撮影モード対応
    ========================= */
 
 /* ========= ユーティリティ & 状態 ========= */
@@ -98,16 +98,11 @@ function toTag(txt) {
   return normalizeTag(txt);
 }
 
-/* ===== 辞書（無料版：プロ版と同じJSONから読み込み） ===== */
+/* ===== 辞書（無料版：基本機能のみ） ===== */
 let SFW = {
   hair_style: [], eyes: [], outfit: [], face: [], skin_body: [], art_style: [], background: [],
   pose: [], composition: [], view: [], expressions: [], accessories: [], lighting: [],
   age: [], gender: [], body_type: [], height: [], personality: [], colors: []
-};
-
-let NSFW = {
-  expression: [], exposure: [], situation: [], lighting: [], background: [],
-  pose: [], accessory: [], outfit: [], body: [], nipples: [], underwear: []
 };
 
 function normItem(x) {
@@ -137,13 +132,8 @@ function dedupeByTag(list) {
 }
 
 function mergeIntoSFW(json) {
-  console.log("mergeIntoSFW開始:", json);
-  
   const src = json?.SFW || json || {};
   const next = { ...SFW };
-  
-  // 外部辞書の実際の構造を確認
-  console.log("外部辞書の構造:", Object.keys(src));
   
   const KEYMAP = {
     "髪型": "hair_style", "目の形": "eyes", "服": "outfit", "顔の特徴": "face",
@@ -152,8 +142,7 @@ function mergeIntoSFW(json) {
     "アクセサリー": "accessories", "ライティング": "lighting", "年齢": "age",
     "性別": "gender", "体型(基本)": "body_type", "身長": "height", "性格": "personality",
     "色": "colors",
-    
-    // 英語キーも追加
+    // 英語キーも対応
     "hair_style": "hair_style", "eyes": "eyes", "outfit": "outfit", "face": "face",
     "skin_body": "skin_body", "view": "view", "art_style": "art_style", 
     "background": "background", "pose": "pose", "composition": "composition", 
@@ -164,84 +153,10 @@ function mergeIntoSFW(json) {
 
   for (const [k, v] of Object.entries(src || {})) {
     const key = KEYMAP[k] || k;
-    console.log(`マッピング: ${k} -> ${key} (${Array.isArray(v) ? v.length : 0}個)`);
-    
-    if (next[key] !== undefined) {
-      next[key] = dedupeByTag([...(next[key] || []), ...normList(v)]);
-    } else {
-      console.warn(`未知のキー: ${k} -> ${key}`);
-    }
+    if (next[key] === undefined) continue;
+    next[key] = dedupeByTag([...(next[key] || []), ...normList(v)]);
   }
-  
-  // 特に重要なカテゴリの内容を詳細確認
-  if (next.outfit && next.outfit.length > 0) {
-    console.log("outfit最初の3項目:");
-    for (let i = 0; i < Math.min(3, next.outfit.length); i++) {
-      console.log(`  [${i}]:`, next.outfit[i]);
-    }
-  }
-  
   SFW = next;
-  console.log("mergeIntoSFW完了:", SFW);
-}
-
-function normNSFW(ns) {
-  const src = (ns && ns.categories) ? ns.categories : (ns || {});
-  const ALIAS = {
-    expression: ['expression', '表情'],
-    exposure: ['exposure', '露出'],
-    situation: ['situation', 'シチュ', 'scenario', 'context'],
-    lighting: ['lighting', 'ライティング', 'light'],
-    background: ['background', '背景'],
-    pose: ['pose', 'poses', 'ポーズ'],
-    accessory: ['accessory', 'accessories', 'acc', 'アクセ', 'アクセサリー'],
-    outfit: ['outfit', 'outfits', 'costume', 'clothes', '衣装'],
-    body: ['body', 'anatomy', 'feature', 'features', 'body_features', 'body_shape', '身体', '体型'],
-    nipples: ['nipples', 'nipple', '乳首', '乳首系'],
-    underwear: ['underwear', 'lingerie', '下着', 'インナー']
-  };
-
-  const pickBy = (names) => {
-    for (const k of names) {
-      if (Array.isArray(src?.[k])) return normList(src[k]);
-    }
-    return [];
-  };
-
-  return {
-    expression: pickBy(ALIAS.expression),
-    exposure: pickBy(ALIAS.exposure),
-    situation: pickBy(ALIAS.situation),
-    lighting: pickBy(ALIAS.lighting),
-    background: pickBy(ALIAS.background),
-    pose: pickBy(ALIAS.pose),
-    accessory: pickBy(ALIAS.accessory),
-    outfit: pickBy(ALIAS.outfit),
-    body: pickBy(ALIAS.body),
-    nipples: pickBy(ALIAS.nipples),
-    underwear: pickBy(ALIAS.underwear)
-  };
-}
-
-function mergeIntoNSFW(json) {
-  const src = json?.NSFW ? normNSFW(json.NSFW) : normNSFW(json);
-  NSFW = NSFW || {};
-  const ensure = (k) => { if (!Array.isArray(NSFW[k])) NSFW[k] = []; };
-  ['expression', 'exposure', 'situation', 'lighting', 'background', 'pose', 'accessory', 'outfit', 'body', 'nipples', 'underwear'].forEach(ensure);
-
-  NSFW = {
-    expression: dedupeByTag([...(NSFW.expression || []), ...(src.expression || [])]),
-    exposure: dedupeByTag([...(NSFW.exposure || []), ...(src.exposure || [])]),
-    situation: dedupeByTag([...(NSFW.situation || []), ...(src.situation || [])]),
-    lighting: dedupeByTag([...(NSFW.lighting || []), ...(src.lighting || [])]),
-    background: dedupeByTag([...(NSFW.background || []), ...(src.background || [])]),
-    pose: dedupeByTag([...(NSFW.pose || []), ...(src.pose || [])]),
-    accessory: dedupeByTag([...(NSFW.accessory || []), ...(src.accessory || [])]),
-    outfit: dedupeByTag([...(NSFW.outfit || []), ...(src.outfit || [])]),
-    body: dedupeByTag([...(NSFW.body || []), ...(src.body || [])]),
-    nipples: dedupeByTag([...(NSFW.nipples || []), ...(src.nipples || [])]),
-    underwear: dedupeByTag([...(NSFW.underwear || []), ...(src.underwear || [])])
-  };
 }
 
 // フォールバック用の最小辞書
@@ -364,7 +279,6 @@ async function loadDefaultDicts() {
   // 外部辞書を試行
   const sfw = await tryFetch("dict/default_sfw.json");
   if (sfw) { 
-    console.log("外部SFW辞書読み込み成功:", sfw);
     mergeIntoSFW(sfw); 
     renderSFW(); 
     renderShooting();
@@ -375,18 +289,10 @@ async function loadDefaultDicts() {
   // フォールバック辞書
   console.warn("外部辞書読み込み失敗。フォールバック辞書を使用。");
   loadFallbackDict();
-
-  const nsfw = await tryFetch("dict/default_nsfw.json");
-  if (nsfw) { 
-    mergeIntoNSFW(nsfw); 
-    toast("NSFW辞書を読み込みました（無料版では使用しません）"); 
-  }
 }
 
 /* ===== レンダリング関数 ===== */
 function renderSFW() {
-  console.log("renderSFW開始", SFW);
-  
   radioList($("#bf_age"), SFW.age, "bf_age");
   radioList($("#bf_gender"), SFW.gender, "bf_gender");  
   radioList($("#bf_body"), SFW.body_type, "bf_body");
@@ -394,22 +300,7 @@ function renderSFW() {
   radioList($("#hairStyle"), SFW.hair_style, "hairStyle");
   radioList($("#eyeShape"), SFW.eyes, "eyeShape");
 
-  // 服カテゴリ別レンダリング（デバッグログ追加）
-  console.log("outfit配列:", SFW.outfit);
-  
-  // 最初の数個のoutfit項目の構造を詳しく確認
-  if (SFW.outfit.length > 0) {
-    console.log("outfit[0]の構造:", SFW.outfit[0]);
-    console.log("outfit[1]の構造:", SFW.outfit[1]);
-    console.log("outfit[2]の構造:", SFW.outfit[2]);
-    
-    // catプロパティの種類を確認
-    const catValues = SFW.outfit.map(item => item.cat).filter(Boolean);
-    const uniqueCats = [...new Set(catValues)];
-    console.log("存在するcat値:", uniqueCats);
-  }
-  
-  // より柔軟なフィルタリング（catがない場合はtagやlabelから推測）
+  // 服カテゴリ別レンダリング
   const outfitTop = SFW.outfit.filter(item => {
     return item.cat === "top" || 
            item.category === "top" ||
@@ -450,13 +341,6 @@ function renderSFW() {
            (item.label && /靴|シューズ|ブーツ|スニーカー|ヒール|サンダル/i.test(item.label));
   });
 
-  console.log("フィルタ結果:");
-  console.log("- トップス:", outfitTop);
-  console.log("- ドレス:", outfitDress);
-  console.log("- パンツ:", outfitPants);
-  console.log("- スカート:", outfitSkirt);
-  console.log("- 靴:", outfitShoes);
-
   radioList($("#outfit_top"), outfitTop, "outfit_top");
   radioList($("#outfit_dress"), outfitDress, "outfit_dress");
   radioList($("#outfit_pants"), outfitPants, "outfit_pants");
@@ -465,19 +349,6 @@ function renderSFW() {
 }
 
 function renderShooting() {
-  console.log("renderShooting開始", SFW);
-  
-  // 各カテゴリの最初の項目をデバッグ表示
-  if (SFW.pose && SFW.pose.length > 0) {
-    console.log("pose[0]の構造:", SFW.pose[0]);
-  }
-  if (SFW.composition && SFW.composition.length > 0) {
-    console.log("composition[0]の構造:", SFW.composition[0]);
-  }
-  if (SFW.view && SFW.view.length > 0) {
-    console.log("view[0]の構造:", SFW.view[0]);
-  }
-  
   radioList($("#s_bg"), SFW.background, "s_bg");
   radioList($("#s_pose"), SFW.pose, "s_pose");
   radioList($("#s_comp"), SFW.composition, "s_comp");
@@ -487,13 +358,8 @@ function renderShooting() {
 }
 
 function radioList(el, list, name, { checkFirst = true } = {}) {
-  if (!el) {
-    console.warn(`要素が見つかりません: ${name}`);
-    return;
-  }
-  
+  if (!el) return;
   const items = normList(list);
-  console.log(`radioList(${name}): ${items.length}個の項目`, items);
   
   el.innerHTML = '';
   
@@ -751,7 +617,7 @@ function initColorWheel(idBase, defaultHue = 0, defaultS = 80, defaultL = 50) {
   return () => tag.textContent.trim();
 }
 
-/* ===== プロンプト生成関数 ===== */
+/* ===== プロンプト生成関数群 ===== */
 function collectBasicInfo() {
   const info = {};
   
@@ -829,7 +695,7 @@ function buildPrompt(info, additionalTags = []) {
   // 服装
   if (info.outfit) {
     // ワンピース
-    if (info.topColor) {
+    if (info.topColor && info.topColor !== "—") {
       tags.push(`${info.topColor} ${info.outfit}`);
     } else {
       tags.push(info.outfit);
@@ -837,7 +703,7 @@ function buildPrompt(info, additionalTags = []) {
   } else {
     // 上下セパレート
     if (info.top) {
-      if (info.topColor) {
+      if (info.topColor && info.topColor !== "—") {
         tags.push(`${info.topColor} ${info.top}`);
       } else {
         tags.push(info.top);
@@ -845,7 +711,7 @@ function buildPrompt(info, additionalTags = []) {
     }
     
     if (info.bottom) {
-      if (info.bottomColor) {
+      if (info.bottomColor && info.bottomColor !== "—") {
         tags.push(`${info.bottomColor} ${info.bottom}`);
       } else {
         tags.push(info.bottom);
@@ -854,7 +720,7 @@ function buildPrompt(info, additionalTags = []) {
   }
   
   if (info.shoes) {
-    if (info.shoesColor) {
+    if (info.shoesColor && info.shoesColor !== "—") {
       tags.push(`${info.shoesColor} ${info.shoes}`);
     } else {
       tags.push(info.shoes);
