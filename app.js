@@ -933,7 +933,7 @@ function initColorWheels() {
   initColorWheel("shoes", 0, 0, 30);     // 黒系
 }
 
-/* ===== 初期化 ===== */
+/* ===== 初期化の修正 ===== */
 function initApp() {
   console.log("アプリケーション初期化開始");
   
@@ -974,9 +974,33 @@ function initApp() {
     console.error("辞書読み込みエラー:", err);
     loadFallbackDict();
   });
+  
+  // 色ホイール初期化
+  initColorWheels();
+  
+  // イベントハンドラー設定
+  setupBasicHandlers();
+  setupShootingHandlers();
+  
+  // タブ切り替え時の再レンダリング
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      const mode = this.dataset.mode;
+      if (mode === 'shooting') {
+        // 撮影タブが選択されたときに再レンダリング
+        setTimeout(() => {
+          renderShooting();
+          console.log("撮影タブ切り替えでレンダリング実行");
+        }, 100);
+      }
+    });
+  });
+  
+  console.log("アプリケーション初期化完了");
+}
 
-
-   // 手動で撮影モードを再レンダリングするためのデバッグ関数
+// 手動で撮影モードを再レンダリングするためのデバッグ関数
 window.debugRenderShooting = function() {
   console.log("手動レンダリング実行");
   console.log("SFW.background:", SFW.background);
