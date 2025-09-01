@@ -121,6 +121,17 @@
       margin-left: 5px;
       font-size: 0.8em;
     }
+
+    /* 無料版制限表示 */
+    .free-limit-note {
+      background: #e8f4fd;
+      border: 1px solid #bee5eb;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin: 8px 0;
+      color: #0c5460;
+      font-size: 0.9em;
+    }
   </style>
 </head>
 <body>
@@ -128,8 +139,8 @@
     <div class="inner">
       <div class="tabbar">
         <div class="tab active" data-mode="basic">👤 基本情報<span class="free-badge">FREE</span></div>
+        <div class="tab" data-mode="shooting">📷 簡易撮影<span class="free-badge">FREE</span></div>
         <div class="tab disabled" data-mode="word">📖 単語モード</div>
-        <div class="tab disabled" data-mode="planner">📷 撮影モード</div>
         <div class="tab disabled" data-mode="learning">🧠 LoRA学習モード</div>
         <div class="tab disabled" data-mode="production">📦 量産モード</div>
         <div class="tab disabled" data-mode="settings">⚙️ 設定</div>
@@ -146,13 +157,12 @@
     <section id="panelBasic" class="card">
       <div class="header-row">
         <h2 class="card-title">キャラの基本情報 <span class="free-badge">FREE</span></h2>
-        <input type="file" id="importChar" accept="application/json" hidden>
-        <label for="importChar" class="btn small">キャラ設定を読み込む</label>
+        <button id="btnExportChar" class="btn ghost">キャラ設定エクスポート</button>
       </div>
 
       <div class="note mini">
         髪/瞳/肌・髪型・目の形・服・<b>服カラー</b>はここで固定。<br>
-        <strong>無料版では基本情報の設定とテスト生成のみ利用できます。より高度な機能はプロ版をご利用ください。</strong>
+        <strong>無料版では基本情報の設定とテスト生成、簡易撮影モードをご利用いただけます。</strong>
       </div>
 
       <!-- テキスト属性（SFW基礎） -->
@@ -391,11 +401,97 @@
       </div>
     </section>
 
+    <!-- 簡易撮影モード（無料版で利用可能） -->
+    <section id="panelShooting" class="card" hidden>
+      <div class="header-row">
+        <h2 class="card-title">簡易撮影モード <span class="free-badge">FREE</span></h2>
+      </div>
+      
+      <div class="free-limit-note">
+        <strong>📷 無料版の制限:</strong> 各カテゴリから1つずつのみ選択可能。プロ版では複数選択・ランダム生成・NSFW要素・量産機能をご利用いただけます。
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="row mini"><b>背景（1つ選択）</b></div>
+          <div id="s_bg" class="scroller"></div>
+        </div>
+        <div class="panel">
+          <div class="row mini"><b>ポーズ（1つ選択）</b></div>
+          <div id="s_pose" class="scroller"></div>
+        </div>
+        <div class="panel">
+          <div class="row mini"><b>構図（1つ選択）</b></div>
+          <div id="s_comp" class="scroller"></div>
+        </div>
+        <div class="panel">
+          <div class="row mini"><b>視点（1つ選択）</b></div>
+          <div id="s_view" class="scroller"></div>
+        </div>
+        <div class="panel">
+          <div class="row mini"><b>表情（1つ選択）</b></div>
+          <div id="s_expr" class="scroller"></div>
+        </div>
+        <div class="panel">
+          <div class="row mini"><b>ライティング（1つ選択）</b></div>
+          <div id="s_light" class="scroller"></div>
+        </div>
+      </div>
+
+      <hr class="sep">
+
+      <div class="panel">
+        <h3>固定タグ / ネガティブ</h3>
+        <label>固定タグ（先頭に付与）</label>
+        <textarea id="fixedShooting" rows="2" placeholder="例: masterpiece, best quality"></textarea>
+        <div class="note mini" style="margin-top:6px">
+          ※ 基本情報の設定内容は自動で含まれます
+        </div>
+      </div>
+
+      <div class="row" style="gap:8px;margin-top:10px">
+        <button id="btnShootingOne" class="btn ok">撮影モード生成</button>
+        <label class="inline mini">出力フォーマット
+          <select id="fmtShooting">
+            <option value="a1111" selected>Web UI（汎用）</option>
+            <option value="invoke">InvokeAI（CLI）</option>
+            <option value="comfy">ComfyUI（テキスト）</option>
+            <option value="sdnext">SD.Next（dream.py）</option>
+            <option value="nai">NovelAI</option>
+          </select>
+        </label>
+        <span style="flex:1"></span>
+      </div>
+      
+      <div class="grid g4" style="margin-top:10px">
+        <div>
+          <div class="mini" style="margin:0 0 .35rem">全部</div>
+          <div class="out" id="outShootingAll"></div>
+          <button id="btnCopyShootingAll" class="btn ghost small" style="margin-top:6px">全部をコピー</button>
+        </div>
+        <div>
+          <div class="mini" style="margin:0 0 .35rem">Promptのみ</div>
+          <div class="out" id="outShootingPrompt"></div>
+          <button id="btnCopyShootingPrompt" class="btn ghost small" style="margin-top:6px">Promptだけコピー</button>
+        </div>
+        <div>
+          <div class="mini" style="margin:0 0 .35rem">Negativeのみ</div>
+          <div class="out" id="outShootingNeg"></div>
+          <button id="btnCopyShootingNeg" class="btn ghost small" style="margin-top:6px">Negativeだけコピー</button>
+        </div>
+        <div>
+          <div class="mini" style="margin:0 0 .35rem">キャプション用</div>
+          <div class="out" id="outShootingCaption"></div>
+          <button id="btnCopyShootingCaption" class="btn ghost small" style="margin-top:6px">キャプションをコピー</button>
+        </div>
+      </div>
+    </section>
+
     <!-- プロ版限定タブ（制限表示） -->
     <section id="panelWordMode" class="card pro-only-overlay" hidden>
       <div class="pro-only-banner">
         <h3>🔒 単語モード（プロ版限定）</h3>
-        <p>辞書からカテゴリ別に単語を選び、最大20件まで蓄積・コピーできる高度な機能です。</p>
+        <p>辞書からカテゴリ別に単語を選び、最大20件まで蓄積・コピーできる高度な機能です。NSFW要素や高度な分類機能も含みます。</p>
         <a href="#pro-version" class="pro-upgrade-btn">プロ版にアップグレード</a>
       </div>
       <div style="padding: 40px; color: #999;">
@@ -404,22 +500,10 @@
       </div>
     </section>
 
-    <section id="panelPlanner" class="card pro-only-overlay" hidden>
-      <div class="pro-only-banner">
-        <h3>🔒 撮影モード（プロ版限定）</h3>
-        <p>1枚だけ確定出力。学習・量産のホワイトリストなしで自由度の高いプロンプト生成が可能です。</p>
-        <a href="#pro-version" class="pro-upgrade-btn">プロ版にアップグレード</a>
-      </div>
-      <div style="padding: 40px; color: #999;">
-        <h2>撮影モード</h2>
-        <p>この機能はプロ版でのみご利用いただけます...</p>
-      </div>
-    </section>
-
     <section id="panelLearning" class="card pro-only-overlay" hidden>
       <div class="pro-only-banner">
         <h3>🔒 LoRA学習モード（プロ版限定）</h3>
-        <p>LoRA学習用の統一性のあるプロンプトセットを自動生成。配分ルールによる最適化機能付き。</p>
+        <p>LoRA学習用の統一性のあるプロンプトセットを自動生成。配分ルールによる最適化機能やNSFW要素対応。</p>
         <a href="#pro-version" class="pro-upgrade-btn">プロ版にアップグレード</a>
       </div>
       <div style="padding: 40px; color: #999;">
@@ -431,7 +515,7 @@
     <section id="panelProduction" class="card pro-only-overlay" hidden>
       <div class="pro-only-banner">
         <h3>🔒 量産モード（プロ版限定）</h3>
-        <p>LoRA完成後の多様性重視の量産プロンプト生成。アクセ3枠、色指定など高機能。</p>
+        <p>LoRA完成後の多様性重視の量産プロンプト生成。アクセ3枠、複数選択、NSFW要素など高機能。</p>
         <a href="#pro-version" class="pro-upgrade-btn">プロ版にアップグレード</a>
       </div>
       <div style="padding: 40px; color: #999;">
@@ -460,7 +544,7 @@
           <h3 style="color: white;">Pro版の機能</h3>
           <ul style="line-height: 1.6;">
             <li><strong>📖 単語モード</strong> - 辞書から自由に単語を選んでプロンプト作成</li>
-            <li><strong>📷 撮影モード</strong> - 1枚完結の自由度の高いプロンプト生成</li>
+            <li><strong>📷 フル撮影モード</strong> - 複数選択・ランダム生成・NSFW要素対応</li>
             <li><strong>🧠 LoRA学習モード</strong> - 統一性のある学習用プロンプトセット生成</li>
             <li><strong>📦 量産モード</strong> - 多様性重視の大量プロンプト生成</li>
             <li><strong>⚙️ 高度な設定</strong> - クラウド保存、辞書I/O、詳細設定</li>
@@ -475,10 +559,11 @@
             <tr><th>機能</th><th>無料版</th><th>Pro版</th></tr>
             <tr><td>基本情報設定</td><td>✅</td><td>✅</td></tr>
             <tr><td>1枚テスト生成</td><td>✅</td><td>✅</td></tr>
+            <tr><td>簡易撮影モード</td><td>✅ 1つずつ</td><td>✅ 複数選択</td></tr>
             <tr><td>単語モード</td><td>❌</td><td>✅</td></tr>
-            <tr><td>撮影モード</td><td>❌</td><td>✅</td></tr>
             <tr><td>学習モード</td><td>❌</td><td>✅</td></tr>
             <tr><td>量産モード</td><td>❌</td><td>✅</td></tr>
+            <tr><td>NSFW要素</td><td>❌</td><td>✅</td></tr>
             <tr><td>設定・保存</td><td>❌</td><td>✅</td></tr>
           </table>
           <div style="text-align: center; margin-top: 20px;">
@@ -493,7 +578,7 @@
 
   <script src="app.js" defer></script>
   <script>
-    // 無料版用のタブ制限機能
+    // 無料版用のタブ切り替え機能
     document.addEventListener('DOMContentLoaded', function() {
       const tabs = document.querySelectorAll('.tab');
       
@@ -501,25 +586,24 @@
         tab.addEventListener('click', function(e) {
           const mode = this.dataset.mode;
           
-          // 基本情報以外はプロ版限定メッセージを表示
-          if (mode !== 'basic' && this.classList.contains('disabled')) {
+          // プロ版限定タブの制限
+          if (this.classList.contains('disabled')) {
             e.preventDefault();
-            alert('この機能はプロ版限定です。\n\nプロ版では以下の機能をご利用いただけます：\n• 単語モード - 辞書から自由選択\n• 撮影モード - 自由度の高い生成\n• 学習モード - LoRA用プロンプトセット\n• 量産モード - 大量プロンプト生成\n• 高度な設定 - クラウド保存等');
+            const featureName = this.textContent.replace('🔒', '').trim();
+            alert(`🔒 ${featureName}はプロ版限定機能です\n\nプロ版では以下の機能をご利用いただけます：\n• 単語モード - 辞書から自由選択\n• フル撮影モード - 複数選択・NSFW対応\n• 学習モード - LoRA用プロンプトセット\n• 量産モード - 大量プロンプト生成\n• 高度な設定 - クラウド保存等\n\nプロ版のご購入をご検討ください。`);
             return false;
           }
           
-          // 基本情報タブの場合は通常の動作
-          if (mode === 'basic') {
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            document.getElementById('panelBasic').hidden = false;
-            document.getElementById('panelWordMode').hidden = true;
-            document.getElementById('panelPlanner').hidden = true;
-            document.getElementById('panelLearning').hidden = true;
-            document.getElementById('panelProduction').hidden = true;
-            document.getElementById('panelSettings').hidden = true;
-          }
+          // 利用可能なタブの切り替え
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          document.getElementById('panelBasic').hidden = (mode !== 'basic');
+          document.getElementById('panelShooting').hidden = (mode !== 'shooting');
+          document.getElementById('panelWordMode').hidden = (mode !== 'word');
+          document.getElementById('panelLearning').hidden = (mode !== 'learning');
+          document.getElementById('panelProduction').hidden = (mode !== 'production');
+          document.getElementById('panelSettings').hidden = (mode !== 'settings');
         });
       });
       
