@@ -1,6 +1,6 @@
 /* =========================
-   AI Prompt Maker Free Version – app.js v6
-   案1: 簡易撮影モード対応 + プロ版同一辞書読み込み
+   AI Prompt Maker Free Version – app.js v6.1
+   案1: 簡易撮影モード対応 + プロ版同一辞書読み込み + 修正版
    ========================= */
 
 /* ========= ユーティリティ & 状態 ========= */
@@ -235,9 +235,9 @@ function loadFallbackDict() {
     outfit: [
       { tag: "t-shirt", label: "Tシャツ", cat: "top", level: "L1" },
       { tag: "blouse", label: "ブラウス", cat: "top", level: "L1" },
+      { tag: "dress", label: "ドレス", cat: "dress", level: "L1" },
       { tag: "jeans", label: "ジーンズ", cat: "pants", level: "L1" },
       { tag: "skirt", label: "スカート", cat: "skirt", level: "L1" },
-      { tag: "dress", label: "ドレス", cat: "dress", level: "L1" },
       { tag: "sneakers", label: "スニーカー", cat: "shoes", level: "L1" }
     ],
     age: [
@@ -245,8 +245,8 @@ function loadFallbackDict() {
       { tag: "adult", label: "大人", level: "L1" }
     ],
     gender: [
-      { tag: "female", label: "女性", level: "L1" },
-      { tag: "male", label: "男性", level: "L1" }
+      { tag: "1girl", label: "女性", level: "L1" },
+      { tag: "1boy", label: "男性", level: "L1" }
     ],
     body_type: [
       { tag: "slender", label: "スレンダー", level: "L1" },
@@ -325,6 +325,38 @@ async function loadDefaultDicts() {
     mergeIntoNSFW(nsfw); 
     toast("NSFW辞書を読み込みました（無料版では使用しません）"); 
   }
+}
+
+/* ===== レンダリング関数 ===== */
+function renderSFW() {
+  radioList($("#bf_age"), SFW.age, "bf_age");
+  radioList($("#bf_gender"), SFW.gender, "bf_gender");  
+  radioList($("#bf_body"), SFW.body_type, "bf_body");
+  radioList($("#bf_height"), SFW.height, "bf_height");
+  radioList($("#hairStyle"), SFW.hair_style, "hairStyle");
+  radioList($("#eyeShape"), SFW.eyes, "eyeShape");
+
+  // 服カテゴリ別レンダリング
+  const outfitTop = SFW.outfit.filter(item => item.cat === "top");
+  const outfitDress = SFW.outfit.filter(item => item.cat === "dress");
+  const outfitPants = SFW.outfit.filter(item => item.cat === "pants");
+  const outfitSkirt = SFW.outfit.filter(item => item.cat === "skirt");
+  const outfitShoes = SFW.outfit.filter(item => item.cat === "shoes");
+
+  radioList($("#outfit_top"), outfitTop, "outfit_top");
+  radioList($("#outfit_dress"), outfitDress, "outfit_dress");
+  radioList($("#outfit_pants"), outfitPants, "outfit_pants");
+  radioList($("#outfit_skirt"), outfitSkirt, "outfit_skirt");
+  radioList($("#outfit_shoes"), outfitShoes, "outfit_shoes");
+}
+
+function renderShooting() {
+  radioList($("#s_bg"), SFW.background, "s_bg");
+  radioList($("#s_pose"), SFW.pose, "s_pose");
+  radioList($("#s_comp"), SFW.composition, "s_comp");
+  radioList($("#s_view"), SFW.view, "s_view");
+  radioList($("#s_expr"), SFW.expressions, "s_expr");
+  radioList($("#s_light"), SFW.lighting, "s_light");
 }
 
 function radioList(el, list, name, { checkFirst = true } = {}) {
@@ -580,4 +612,285 @@ function initColorWheel(idBase, defaultHue = 0, defaultS = 80, defaultL = 50) {
   });
   
   return () => tag.textContent.trim();
+}
+
+/* ===== プロンプト生成関数 ===== */
+function collectBasicInfo() {
+  const info = {};
+  
+  // 基本属性
+  info.age = getOne("bf_age");
+  info.gender = getOne("bf_gender");
+  info.bodyType = getOne("bf_body");
+  info.height = getOne("bf_height");
+  info.hairStyle = getOne("hairStyle");
+  info.eyeShape = getOne("eyeShape");
+  
+  // 色情報
+  info.hairColor = $("#tagH")?.textContent?.replace("hair", "").trim();
+  info.eyeColor = $("#tagE")?.textContent?.replace("eyes", "").trim();
+  info.skinTone = $("#tagSkin")?.textContent;
+  
+  // 服装情報
+  const isOnepiece = document.querySelector('input[name="outfitMode"]:checked')?.value === "onepiece";
+  
+  if (isOnepiece) {
+    info.outfit = getOne("outfit_dress");
+    info.topColor = $("#use_top")?.checked ? $("#tag_top")?.textContent : null;
+  } else {
+    info.top = getOne("outfit_top");
+    info.topColor = $("#use_top")?.checked ? $("#tag_top")?.textContent : null;
+    
+    const bottomCat = getOne("bottomCat");
+    if (bottomCat === "pants") {
+      info.bottom = getOne("outfit_pants");
+    } else {
+      info.bottom = getOne("outfit_skirt");
+    }
+    info.bottomColor = $("#useBottomColor")?.checked ? $("#tag_bottom")?.textContent : null;
+  }
+  
+  info.shoes = getOne("outfit_shoes");
+  info.shoesColor = $("#use_shoes")?.checked ? $("#tag_shoes")?.textContent : null;
+  
+  // キャラ情報
+  info.charName = $("#charName")?.value?.trim();
+  info.loraTag = $("#loraTag")?.value?.trim();
+  
+  return info;
+}
+
+function buildPrompt(info, additionalTags = []) {
+  const tags = [];
+  
+  // LoRAタグ
+  if (info.loraTag) tags.push(info.loraTag);
+  
+  // 基本属性
+  if (info.gender) tags.push(info.gender);
+  if (info.age) tags.push(info.age);
+  if (info.bodyType) tags.push(info.bodyType);
+  if (info.height) tags.push(info.height);
+  
+  // 外見
+  if (info.hairStyle && info.hairColor) {
+    tags.push(`${info.hairColor} ${info.hairStyle}`);
+  } else {
+    if (info.hairStyle) tags.push(info.hairStyle);
+    if (info.hairColor) tags.push(`${info.hairColor} hair`);
+  }
+  
+  if (info.eyeShape && info.eyeColor) {
+    tags.push(`${info.eyeColor} ${info.eyeShape}`);
+  } else {
+    if (info.eyeShape) tags.push(info.eyeShape);
+    if (info.eyeColor) tags.push(`${info.eyeColor} eyes`);
+  }
+  
+  if (info.skinTone) tags.push(info.skinTone);
+  
+  // 服装
+  if (info.outfit) {
+    // ワンピース
+    if (info.topColor) {
+      tags.push(`${info.topColor} ${info.outfit}`);
+    } else {
+      tags.push(info.outfit);
+    }
+  } else {
+    // 上下セパレート
+    if (info.top) {
+      if (info.topColor) {
+        tags.push(`${info.topColor} ${info.top}`);
+      } else {
+        tags.push(info.top);
+      }
+    }
+    
+    if (info.bottom) {
+      if (info.bottomColor) {
+        tags.push(`${info.bottomColor} ${info.bottom}`);
+      } else {
+        tags.push(info.bottom);
+      }
+    }
+  }
+  
+  if (info.shoes) {
+    if (info.shoesColor) {
+      tags.push(`${info.shoesColor} ${info.shoes}`);
+    } else {
+      tags.push(info.shoes);
+    }
+  }
+  
+  // 追加タグ
+  tags.push(...additionalTags);
+  
+  return tags.filter(Boolean).join(", ");
+}
+
+function formatOutput(prompt, negative, format = "a1111") {
+  switch (format) {
+    case "invoke":
+      return `${prompt} [${negative}]`;
+    case "comfy":
+      return `Positive: ${prompt}\nNegative: ${negative}`;
+    case "sdnext":
+      return `--prompt "${prompt}" --negative-prompt "${negative}"`;
+    case "nai":
+      return `${prompt}\nUndesired Content: ${negative}`;
+    default: // a1111
+      return `${prompt}\nNegative prompt: ${negative}`;
+  }
+}
+
+/* ===== イベントハンドラー ===== */
+function setupBasicHandlers() {
+  // 1枚テスト生成
+  $("#btnOneLearn")?.addEventListener("click", () => {
+    const info = collectBasicInfo();
+    const prompt = buildPrompt(info);
+    const negative = buildNegative();
+    const format = $("#fmtLearn")?.value || "a1111";
+    
+    const fullOutput = formatOutput(prompt, negative, format);
+    const captionOutput = buildPrompt(info); // キャプション用（ネガティブなし）
+    
+    $("#outLearnTestAll").textContent = fullOutput;
+    $("#outLearnTestPrompt").textContent = prompt;
+    $("#outLearnTestNeg").textContent = negative;
+    $("#outLearnTestCaption").textContent = captionOutput;
+  });
+  
+  // コピーボタン
+  $("#btnCopyLearnTestAll")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outLearnTestAll").textContent);
+    toast("全体をコピーしました");
+  });
+  
+  $("#btnCopyLearnTestPrompt")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outLearnTestPrompt").textContent);
+    toast("プロンプトをコピーしました");
+  });
+  
+  $("#btnCopyLearnTestNeg")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outLearnTestNeg").textContent);
+    toast("ネガティブをコピーしました");
+  });
+  
+  $("#btnCopyLearnTestCaption")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outLearnTestCaption").textContent);
+    toast("キャプションをコピーしました");
+  });
+}
+
+function setupShootingHandlers() {
+  // 撮影モード生成
+  $("#btnShootingOne")?.addEventListener("click", () => {
+    const info = collectBasicInfo();
+    const fixedTags = $("#fixedShooting")?.value?.split(",").map(s => s.trim()).filter(Boolean) || [];
+    
+    const additionalTags = [
+      ...fixedTags,
+      getOne("s_bg"),
+      getOne("s_pose"),
+      getOne("s_comp"),
+      getOne("s_view"),
+      getOne("s_expr"),
+      getOne("s_light")
+    ].filter(Boolean);
+    
+    const prompt = buildPrompt(info, additionalTags);
+    const negative = buildNegative();
+    const format = $("#fmtShooting")?.value || "a1111";
+    
+    const fullOutput = formatOutput(prompt, negative, format);
+    const captionOutput = buildPrompt(info, additionalTags);
+    
+    $("#outShootingAll").textContent = fullOutput;
+    $("#outShootingPrompt").textContent = prompt;
+    $("#outShootingNeg").textContent = negative;
+    $("#outShootingCaption").textContent = captionOutput;
+  });
+  
+  // コピーボタン
+  $("#btnCopyShootingAll")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outShootingAll").textContent);
+    toast("全体をコピーしました");
+  });
+  
+  $("#btnCopyShootingPrompt")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outShootingPrompt").textContent);
+    toast("プロンプトをコピーしました");
+  });
+  
+  $("#btnCopyShootingNeg")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outShootingNeg").textContent);
+    toast("ネガティブをコピーしました");
+  });
+  
+  $("#btnCopyShootingCaption")?.addEventListener("click", () => {
+    navigator.clipboard.writeText($("#outShootingCaption").textContent);
+    toast("キャプションをコピーしました");
+  });
+}
+
+function initColorWheels() {
+  // 髪色（茶色系）
+  initWheel("#wheelH", "#thumbH", "#satH", "#litH", "#swH", "#tagH", "hair");
+  
+  // 瞳色（青系）  
+  initWheel("#wheelE", "#thumbE", "#satE", "#litE", "#swE", "#tagE", "eyes");
+  
+  // 肌色スライダー
+  const skinSlider = $("#skinTone");
+  const skinSwatch = $("#swSkin");
+  const skinTag = $("#tagSkin");
+  
+  if (skinSlider && skinSwatch && skinTag) {
+    const updateSkin = () => {
+      const tone = +skinSlider.value;
+      const lightness = 85 - (tone * 0.5); // 85% -> 35%
+      skinSwatch.style.background = `hsl(25, 40%, ${lightness}%)`;
+      skinTag.textContent = toneToTag(tone);
+    };
+    
+    skinSlider.addEventListener("input", updateSkin);
+    updateSkin();
+  }
+  
+  // 服色ホイール
+  initColorWheel("top", 220, 80, 55);    // 青系
+  initColorWheel("bottom", 0, 70, 50);   // 赤系  
+  initColorWheel("shoes", 0, 0, 30);     // 黒系
+}
+
+/* ===== 初期化 ===== */
+function initApp() {
+  console.log("アプリケーション初期化開始");
+  
+  // 辞書読み込み
+  loadDefaultDicts().then(() => {
+    console.log("辞書読み込み完了");
+  }).catch(err => {
+    console.error("辞書読み込みエラー:", err);
+    loadFallbackDict();
+  });
+  
+  // 色ホイール初期化
+  initColorWheels();
+  
+  // イベントハンドラー設定
+  setupBasicHandlers();
+  setupShootingHandlers();
+  
+  console.log("アプリケーション初期化完了");
+}
+
+// DOMContentLoaded イベントで初期化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
