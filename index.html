@@ -711,139 +711,216 @@
   <!-- AdSenseのローダ（使う場合のみ） -->
   <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXX" crossorigin="anonymous"></script> -->
   <script src="app.js" defer></script>
-  <script>
-    // 無料版用のタブ切り替え機能
-    document.addEventListener('DOMContentLoaded', function() {
-      const tabs = document.querySelectorAll('.tab');
-      
-      tabs.forEach(tab => {
-        tab.addEventListener('click', function(e) {
-          const mode = this.dataset.mode;
-          
-          // プロ版限定タブの制限
-          if (this.classList.contains('disabled')) {
-            e.preventDefault();
-            const featureName = this.textContent.replace('🔒', '').trim();
-            alert(`🔒 ${featureName}はプロ版限定機能です\n\nプロ版では以下の機能をご利用いただけます：\n• 単語モード - 辞書から自由選択\n• フル撮影モード - 複数選択・NSFW対応\n• 学習モード - LoRA用プロンプトセット\n• 量産モード - 大量プロンプト生成\n• 高度な設定 - クラウド保存等\n\nプロ版のご購入をご検討ください。`);
-            return false;
-          }
-          
-          // 利用可能なタブの切り替え
-          tabs.forEach(t => t.classList.remove('active'));
-          this.classList.add('active');
-          
-          document.getElementById('panelBasic').hidden = (mode !== 'basic');
-          document.getElementById('panelShooting').hidden = (mode !== 'shooting');
-          document.getElementById('panelWordMode').hidden = (mode !== 'word');
-          document.getElementById('panelLearning').hidden = (mode !== 'learning');
-          document.getElementById('panelProduction').hidden = (mode !== 'production');
-          document.getElementById('panelSettings').hidden = (mode !== 'settings');
-        });
-      });
-      
-      // プロ版ボタンのクリックイベント
-      document.querySelectorAll('a[href="#pro-version"], .pro-upgrade-btn').forEach(link => {
-        link.addEventListener('click', function(e) {
+<script>
+  // =========================
+  // 無料版用のタブ切り替え機能（既存ロジックそのまま）
+  // =========================
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function(e) {
+        const mode = this.dataset.mode;
+
+        // プロ版限定タブの制限
+        if (this.classList.contains('disabled')) {
           e.preventDefault();
-          document.getElementById('pro-version').scrollIntoView({ behavior: 'smooth' });
-        });
+          const featureName = this.textContent.replace('🔒', '').trim();
+          alert(`🔒 ${featureName}はプロ版限定機能です\n\nプロ版では以下の機能をご利用いただけます：\n• 単語モード - 辞書から自由選択\n• フル撮影モード - 複数選択・NSFW対応\n• 学習モード - LoRA用プロンプトセット\n• 量産モード - 大量プロンプト生成\n• 高度な設定 - クラウド保存等\n\nプロ版のご購入をご検討ください。`);
+          return false;
+        }
+
+        // 利用可能なタブの切り替え
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        document.getElementById('panelBasic').hidden      = (mode !== 'basic');
+        document.getElementById('panelShooting').hidden   = (mode !== 'shooting');
+        document.getElementById('panelWordMode').hidden   = (mode !== 'word');
+        document.getElementById('panelLearning').hidden   = (mode !== 'learning');
+        document.getElementById('panelProduction').hidden = (mode !== 'production');
+        document.getElementById('panelSettings').hidden   = (mode !== 'settings');
       });
-      
-  document.querySelectorAll('a[href="#purchase-link"]').forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      // Pro版の購入ページを新しいタブで開く
-      window.open('https://note.com/taka_aiworks/n/n2649a6548cad', '_blank');
     });
-  });
-});
-    
-    // 基本情報タブのスクリプト（元のコードから必要部分を抜粋）
-    (() => {
-      const scope = document.getElementById('panelBasic');
-      if (!scope) return;
-    
-      // グローバルの $ / $$ を壊さないために別名を使用
-      const qs  = (sel) => scope.querySelector(sel);
-      const qsa = (sel) => Array.from(scope.querySelectorAll(sel)); // ←必ず配列化
-    
-      const getIsOnepiece = () => {
-        const r = qs('input[name="outfitMode"]:checked');
-        return r?.value === 'onepiece';
-      };
-    
-      const setDisabledDeep = (root, on) => {
-        if (!root) return;
-        root.classList.toggle('is-disabled', !!on);
-        root.querySelectorAll('input, select, textarea, button, fieldset')
-            .forEach(el => { el.disabled = !!on; });
-      };
-    
-      const updateBottomCategory = () => {
-        const selectedCat = qs('input[name="bottomCat"]:checked')?.value || 'pants';
-        const fsPants = qs('#fsBottom_pants');
-        const fsSkirt = qs('#fsBottom_skirt');
-        if (fsPants && fsSkirt) {
-          if (selectedCat === 'pants') {
-            fsPants.style.display = '';
-            fsSkirt.style.display = 'none';
-            fsSkirt.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-          } else {
-            fsPants.style.display = 'none';
-            fsSkirt.style.display = '';
-            fsPants.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-          }
-        }
-      };
-    
-      const applyOutfitMode = () => {
-        const isOnepiece = getIsOnepiece();
-        const fsDress    = qs('#fsDress');
-        const dressPanel = qs('#fsDress')?.closest('.panel');
-        const topPanel   = qs('#outfit_top')?.closest('.panel');
-        const fsPants    = qs('#fsBottom_pants');
-        const fsSkirt    = qs('#fsBottom_skirt');
-        const bottomCat  = qs('#bottomCategoryRadios')?.closest('.panel');
-        const shoesPanel = qs('#outfit_shoes')?.closest('.panel');
-    
-        if (isOnepiece) {
-          setDisabledDeep(fsDress, false);
-          if (dressPanel) setDisabledDeep(dressPanel, false);
-          if (shoesPanel) setDisabledDeep(shoesPanel, false);
-          setDisabledDeep(topPanel, true);
-          setDisabledDeep(fsPants, true);
-          setDisabledDeep(fsSkirt, true);
-          setDisabledDeep(bottomCat, true);
-        } else {
-          setDisabledDeep(topPanel, false);
-          setDisabledDeep(fsPants, false);
-          setDisabledDeep(fsSkirt, false);
-          setDisabledDeep(bottomCat, false);
-          if (shoesPanel) setDisabledDeep(shoesPanel, false);
-          setDisabledDeep(fsDress, true);
-          if (dressPanel) setDisabledDeep(dressPanel, true);
-        }
-        updateBottomCategory();
-      };
-    
-      // outfitMode ラジオ: 変更で切替
-      qsa('#panel_outfitFixed input[name="outfitMode"]').forEach(r => {
-        r.addEventListener('change', applyOutfitMode);
-        r.addEventListener('input',  applyOutfitMode);
+
+    // プロ版ボタンのクリックイベント
+    document.querySelectorAll('a[href="#pro-version"], .pro-upgrade-btn').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('pro-version').scrollIntoView({ behavior: 'smooth' });
       });
-    
-      // bottomCat ラジオ: パンツ/スカート切替
-      qsa('input[name="bottomCat"]').forEach(radio => {
-        radio.addEventListener('change', updateBottomCategory);
+    });
+
+    // Pro購入リンク（新規タブ）
+    document.querySelectorAll('a[href="#purchase-link"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.open('https://note.com/taka_aiworks/n/n2649a6548cad', '_blank');
       });
-    
-      applyOutfitMode();
-      window.addEventListener('pageshow', applyOutfitMode);
-    
-      // デバッグ用（必要なければ削除OK）
-      window.applyOutfitMode      = applyOutfitMode;
-      window.updateBottomCategory = updateBottomCategory;
+    });
+
+    // =========================
+    // 追従アフィ（DMM）をJSで注入
+    // =========================
+    (function setupStickyAffiliate(){
+      // PCで出したくない場合はここで判定
+      const isMobile = window.matchMedia('(max-width: 839px)').matches;
+      // PCにも出したいなら次行の return をコメントアウト
+      if (!isMobile) return;
+
+      // すでに作っていれば二重生成しない
+      if (document.getElementById('sticky-affiliate')) return;
+
+      // スタイルを注入（CSSファイルを触らなくてOK）
+      const style = document.createElement('style');
+      style.textContent = `
+#sticky-affiliate{
+  position:fixed; left:0; right:0; bottom:0; z-index:9999;
+  background:#111827; color:#fff;
+  padding:8px 40px 8px 8px;
+  display:flex; justify-content:center; align-items:center;
+  box-shadow:0 -4px 12px rgba(0,0,0,.25);
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+#sticky-affiliate .widget-banner{ display:block; margin:0 auto; max-width:100%; }
+#sticky-affiliate .sticky-close{
+  position:absolute; top:6px; right:6px; width:28px; height:28px;
+  border:0; border-radius:50%;
+  background:#374151; color:#fff; font-size:18px; cursor:pointer;
+}
+      `;
+      document.head.appendChild(style);
+
+      // コンテナ生成（HTMLを触らずに済む）
+      const box = document.createElement('div');
+      box.id = 'sticky-affiliate';
+      box.hidden = true;
+      box.innerHTML = `
+        <button class="sticky-close" aria-label="広告を閉じる">×</button>
+        <ins class="widget-banner"></ins>
+      `;
+      document.body.appendChild(box);
+
+      // DMMのスクリプト（あなたが指定したタグをそのまま設置）
+      const dmm = document.createElement('script');
+      dmm.className = 'widget-banner-script';
+      dmm.src = 'https://widget-view.dmm.co.jp/js/banner_placement.js?affiliate_id=guidajiben3-001&banner_id=1585_640_100';
+      // DMMはins直下でも、同一コンテナ内ならOK
+      box.appendChild(dmm);
+
+      // 表示制御（閉じてから24時間は非表示）
+      const KEY = 'stickyAffDismissedAt';
+      const ONE_DAY = 24*60*60*1000;
+      const last = Number(localStorage.getItem(KEY) || 0);
+
+      // 底に被らないよう一時的に余白
+      const openBar = () => {
+        box.hidden = false;
+        const pad = 72; // バナー高さ目安
+        document.body.style.paddingBottom = `calc(${pad}px + env(safe-area-inset-bottom, 0px))`;
+      };
+      const closeBar = () => {
+        localStorage.setItem(KEY, String(Date.now()));
+        box.hidden = true;
+        document.body.style.paddingBottom = '';
+      };
+
+      // 24h以上経過で表示
+      if (Date.now() - last > ONE_DAY) openBar();
+
+      // 閉じる操作
+      box.querySelector('.sticky-close')?.addEventListener('click', closeBar);
     })();
-  </script>
-</body>
+  });
+
+  // =========================
+  // 基本情報タブのスクリプト（既存ロジックそのまま）
+  // =========================
+  (() => {
+    const scope = document.getElementById('panelBasic');
+    if (!scope) return;
+
+    // グローバルの $ / $$ を壊さないために別名を使用
+    const qs  = (sel) => scope.querySelector(sel);
+    const qsa = (sel) => Array.from(scope.querySelectorAll(sel)); // ←必ず配列化
+
+    const getIsOnepiece = () => {
+      const r = qs('input[name="outfitMode"]:checked');
+      return r?.value === 'onepiece';
+    };
+
+    const setDisabledDeep = (root, on) => {
+      if (!root) return;
+      root.classList.toggle('is-disabled', !!on);
+      root.querySelectorAll('input, select, textarea, button, fieldset')
+          .forEach(el => { el.disabled = !!on; });
+    };
+
+    const updateBottomCategory = () => {
+      const selectedCat = qs('input[name="bottomCat"]:checked')?.value || 'pants';
+      const fsPants = qs('#fsBottom_pants');
+      const fsSkirt = qs('#fsBottom_skirt');
+      if (fsPants && fsSkirt) {
+        if (selectedCat === 'pants') {
+          fsPants.style.display = '';
+          fsSkirt.style.display = 'none';
+          fsSkirt.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        } else {
+          fsPants.style.display = 'none';
+          fsSkirt.style.display = '';
+          fsPants.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        }
+      }
+    };
+
+    const applyOutfitMode = () => {
+      const isOnepiece = getIsOnepiece();
+      const fsDress    = qs('#fsDress');
+      const dressPanel = qs('#fsDress')?.closest('.panel');
+      const topPanel   = qs('#outfit_top')?.closest('.panel');
+      const fsPants    = qs('#fsBottom_pants');
+      const fsSkirt    = qs('#fsBottom_skirt');
+      const bottomCat  = qs('#bottomCategoryRadios')?.closest('.panel');
+      const shoesPanel = qs('#outfit_shoes')?.closest('.panel');
+
+      if (isOnepiece) {
+        setDisabledDeep(fsDress, false);
+        if (dressPanel) setDisabledDeep(dressPanel, false);
+        if (shoesPanel) setDisabledDeep(shoesPanel, false);
+        setDisabledDeep(topPanel, true);
+        setDisabledDeep(fsPants, true);
+        setDisabledDeep(fsSkirt, true);
+        setDisabledDeep(bottomCat, true);
+      } else {
+        setDisabledDeep(topPanel, false);
+        setDisabledDeep(fsPants, false);
+        setDisabledDeep(fsSkirt, false);
+        setDisabledDeep(bottomCat, false);
+        if (shoesPanel) setDisabledDeep(shoesPanel, false);
+        setDisabledDeep(fsDress, true);
+        if (dressPanel) setDisabledDeep(dressPanel, true);
+      }
+      updateBottomCategory();
+    };
+
+    // outfitMode ラジオ: 変更で切替
+    qsa('#panel_outfitFixed input[name="outfitMode"]').forEach(r => {
+      r.addEventListener('change', applyOutfitMode);
+      r.addEventListener('input',  applyOutfitMode);
+    });
+
+    // bottomCat ラジオ: パンツ/スカート切替
+    qsa('input[name="bottomCat"]').forEach(radio => {
+      radio.addEventListener('change', updateBottomCategory);
+    });
+
+    applyOutfitMode();
+    window.addEventListener('pageshow', applyOutfitMode);
+
+    // デバッグ用（必要なければ削除OK）
+    window.applyOutfitMode      = applyOutfitMode;
+    window.updateBottomCategory = updateBottomCategory;
+  })();
+</script>
+  </body>
 </html>
