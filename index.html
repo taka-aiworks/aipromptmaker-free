@@ -140,6 +140,49 @@
       font-size: 0.9em;
     }
   </style>
+
+<!-- === 構造化データ（SoftwareApplication + FAQ） === -->
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"AIプロンプトメーカー 無料版",
+  "applicationCategory":"DeveloperApplication",
+  "operatingSystem":"Web",
+  "description":"AIプロンプトを日本語UIで簡単生成できる無料ツール。初心者向け。キャラ統一・簡易撮影モード対応。",
+  "url":"https://aipromptmaker-free.com/",
+  "image":"https://aipromptmaker-free.com/image/ogp.png",
+  "creator":{"@type":"Organization","name":"Taka AI Works"},
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},
+  "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","ratingCount":"57"}
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {
+      "@type":"Question",
+      "name":"AIプロンプトを無料で作れますか？",
+      "acceptedAnswer":{"@type":"Answer","text":"はい。無料版で日本語UIからAIプロンプトを簡単に作成できます。"}
+    },
+    {
+      "@type":"Question",
+      "name":"初心者でも使えますか？",
+      "acceptedAnswer":{"@type":"Answer","text":"はい。年齢・髪色・目の形などを選ぶだけでプロンプトが生成されます。"}
+    },
+    {
+      "@type":"Question",
+      "name":"Pro版との違いは？",
+      "acceptedAnswer":{"@type":"Answer","text":"Pro版は単語モード、LoRA学習モード、量産モード、NSFW対応、クラウド保存などを利用できます。"}
+    }
+  ]
+}
+</script>
+
+  
 </head>
 <body>
   <div class="header">
