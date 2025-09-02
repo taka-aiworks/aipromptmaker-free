@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://aipromptmaker-free.com/sitemap.xml
