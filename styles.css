@@ -950,3 +950,45 @@ fieldset:disabled input[type="checkbox"] {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+
+
+/* ===== 下部追従広告 ===== */
+#sticky-affiliate {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: #111827; /* サイトの背景に合わせて調整 */
+  padding: 8px 40px 8px 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.25);
+
+  /* iPhoneのセーフエリア対応 */
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+
+#sticky-affiliate .widget-banner {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+#sticky-affiliate .sticky-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: none;
+  background: #374151;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+}
