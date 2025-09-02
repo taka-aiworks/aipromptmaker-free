@@ -153,7 +153,7 @@
   "description":"AIプロンプトを日本語UIで簡単生成できる無料ツール。初心者向け。キャラ統一・簡易撮影モード対応。",
   "url":"https://aipromptmaker-free.com/",
   "image":"https://aipromptmaker-free.com/image/ogp.png",
-  "creator":{"@type":"Organization","name":"Taka AI Works"},
+  "creator":{"@id":"https://aipromptmaker-free.com/#org"},
   "offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}
 }
 </script>
@@ -187,6 +187,7 @@
 {
   "@context":"https://schema.org",
   "@type":"Organization",
+  "@id":"https://aipromptmaker-free.com/#org",
   "name":"Taka AI Works",
   "url":"https://aipromptmaker-free.com/",
   "logo":"https://aipromptmaker-free.com/image/ogp.png",
@@ -194,23 +195,27 @@
 }
 </script>
 
-  <script type="application/ld+json">
+
+<script type="application/ld+json">
 {
   "@context":"https://schema.org",
   "@type":"Product",
+  "@id":"https://aipromptmaker-free.com/#product-pro",
   "name":"AIプロンプトメーカー Pro",
   "image":"https://aipromptmaker-free.com/image/ogp.png",
   "description":"単語モード・LoRA学習・量産・NSFW対応などの上位機能を備えた有料版。",
-  "brand":{"@type":"Organization","name":"Taka AI Works"},
+  "brand":{"@type":"Organization","@id":"https://aipromptmaker-free.com/#org"},
   "offers":{
     "@type":"Offer",
-    "url":"https://aipromptmaker-free.com/pro",
+    "url":"https://aipromptmaker-free.com/#pro-version",   /* ← /proページが無いならこれに */
     "priceCurrency":"JPY",
-    "price":"割引価格今だけ1980円(通常3980円)",
+    "price":"1980",
     "availability":"https://schema.org/InStock"
+    /* 任意: "priceValidUntil":"2025-12-31" */
   }
 }
 </script>
+
 
 
   
