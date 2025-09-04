@@ -984,6 +984,81 @@
   tick();
 })();
 
+  // ===== 強制パッチ：スマホで確実に下追従させる =====
+(function(){
+  // 1) 要素を確保（なければ作る）
+  let bar = document.getElementById('sticky-affiliate');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'sticky-affiliate';
+    bar.innerHTML = `
+      <button class="sticky-close" aria-label="広告を閉じる">×</button>
+      <ins class="widget-banner" style="display:block;"></ins>
+      <script class="widget-banner-script" src="https://widget-view.dmm.co.jp/js/banner_placement.js?affiliate_id=guidajiben3-001&banner_id=XXXX_300_250"></script>
+    `;
+  }
+  // 2) body直下に移動（transform/overflowコンテナの影響を避ける）
+  if (bar.parentNode !== document.body) document.body.appendChild(bar);
+
+  // 3) スタイルを強制（他CSSの上書きを無視）
+  const styleId = 'sticky-affiliate-force-style';
+  if (!document.getElementById(styleId)) {
+    const st = document.createElement('style');
+    st.id = styleId;
+    st.textContent = `
+#sticky-affiliate{
+  position: fixed !important;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2147483647; /* 最前面 */
+  background:#111827;
+  display:flex; justify-content:center; align-items:center;
+  padding: 8px 40px 8px 8px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.25);
+  -webkit-transform: translateZ(0); transform: translateZ(0); /* iOS安定化 */
+}
+#sticky-affiliate .widget-banner{ width:300px; height:250px; min-height:250px; display:block; }
+#sticky-affiliate .sticky-close{
+  position:absolute; top:6px; right:6px; width:28px; height:28px;
+  border:0; border-radius:50%; background:#374151; color:#fff; font-size:18px; cursor:pointer;
+}
+#sticky-affiliate-spacer{ width:100%; height:0; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // 4) スペーサーで下被りを確実に回避
+  let spacer = document.getElementById('sticky-affiliate-spacer');
+  if (!spacer) {
+    spacer = document.createElement('div');
+    spacer.id = 'sticky-affiliate-spacer';
+    document.body.insertBefore(spacer, bar); // fixedバーの直前に入れる
+  }
+
+  // 5) 24hガードを一時的に無効化して常時表示（動作確認用）
+  //    確認が終わったら下2行をコメントアウトしてOK
+  try { localStorage.removeItem('stickyAffDismissedAt'); } catch(_) {}
+  bar.hidden = false;
+
+  // 6) 実高さに合わせてスペーサー更新（広告ロード後も追従）
+  const update = () => {
+    const h = Math.max(270, Math.round(bar.getBoundingClientRect().height)); // 250 + 余白
+    spacer.style.height = h + 'px';
+  };
+  new (window.ResizeObserver||function(fn){this.observe=()=>window.setTimeout(fn,300);})(update).observe(bar);
+  window.addEventListener('load', update);
+  window.addEventListener('resize', () => setTimeout(update, 100));
+  window.addEventListener('orientationchange', () => setTimeout(update, 300));
+  setTimeout(update, 400); setTimeout(update, 1000);
+
+  // 7) 閉じる
+  bar.querySelector('.sticky-close')?.addEventListener('click', () => {
+    try { localStorage.setItem('stickyAffDismissedAt', String(Date.now())); } catch(_){}
+    bar.hidden = true;
+    spacer.style.height = '0px';
+  });
+})();
+
+
   
 </script>
   </body>
