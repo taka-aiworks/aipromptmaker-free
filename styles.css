@@ -1018,3 +1018,11 @@ fieldset:disabled input[type="checkbox"] {
 /* 子要素はクリック可（バナーと閉じる） */
 #sticky-affiliate .widget-banner, 
 #sticky-affiliate script { pointer-events:auto; }
+
+
+/* 追従バナー用スペーサー（高さだけ確保する） */
+#sticky-affiliate-spacer{
+  width:100%;
+  height:0;           /* JSで動的にセット */
+  flex:0 0 auto;
+}
