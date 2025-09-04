@@ -716,6 +716,11 @@
   // =========================
   document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.tab');
+        // 追従広告を閉じる
+    document.querySelector('#sticky-affiliate .sticky-close')?.addEventListener('click', () => {
+      document.getElementById('sticky-affiliate').style.display = 'none';
+      document.body.style.paddingBottom = '';
+    });
     
     tabs.forEach(tab => {
       tab.addEventListener('click', function(e) {
