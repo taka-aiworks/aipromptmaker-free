@@ -925,6 +925,68 @@
     window.applyOutfitMode      = applyOutfitMode;
     window.updateBottomCategory = updateBottomCategory;
   })();
+
+// ===== 下被り防止：スペーサーで高さを常に確保 =====
+(function(){
+  const bar = document.getElementById('sticky-affiliate');
+  if(!bar) return;
+
+  // スペーサーが無ければ作る（fixedバナーの直前に置く）
+  let spacer = document.getElementById('sticky-affiliate-spacer');
+  if(!spacer){
+    spacer = document.createElement('div');
+    spacer.id = 'sticky-affiliate-spacer';
+    bar.parentNode.insertBefore(spacer, bar);
+  }
+
+  const KEY = 'stickyAffDismissedAt';
+  const ONE_DAY = 24*60*60*1000;
+
+  // バナー実高さ＋セーフエリア分でスペーサーを更新
+  const updateSpacer = () => {
+    // 予備：バナーがまだ0pxなら既知サイズを最低限確保
+    const fallback = 270; // 300x250 + 余白
+    const h = Math.max(Math.round(bar.getBoundingClientRect().height), fallback);
+    // env() はJSから読めないので余裕を多めに（必要なら調整）
+    spacer.style.height = h + 'px';
+  };
+
+  // 表示条件（モバイルだけにしたいなら次の2行のコメントを外す）
+  // if(!window.matchMedia('(max-width: 839px)').matches){
+  //   spacer.style.height = '0px'; return;
+  // }
+
+  // 24h経過で表示
+  const last = Number(localStorage.getItem(KEY)||0);
+  if (Date.now() - last > ONE_DAY) {
+    bar.hidden = false;
+  } else {
+    bar.hidden = true;
+  }
+
+  // 閉じるでスペーサーもゼロに
+  bar.querySelector('.sticky-close')?.addEventListener('click', () => {
+    localStorage.setItem(KEY, String(Date.now()));
+    bar.hidden = true;
+    spacer.style.height = '0px';
+  });
+
+  // バナーの高さ変化（広告ロード、回転、リサイズ）に追従
+  const ro = (window.ResizeObserver)
+    ? new ResizeObserver(updateSpacer) : null;
+  ro?.observe(bar);
+
+  window.addEventListener('load', updateSpacer);
+  window.addEventListener('orientationchange', () => setTimeout(updateSpacer, 300));
+  window.addEventListener('resize', () => setTimeout(updateSpacer, 100));
+
+  // DMM側の非同期レンダに備えて数回リトライ
+  let tries = 0;
+  const tick = () => { updateSpacer(); if(++tries<8) setTimeout(tick, 300); };
+  tick();
+})();
+
+  
 </script>
   </body>
 </html>
